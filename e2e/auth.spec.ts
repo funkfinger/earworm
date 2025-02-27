@@ -42,7 +42,19 @@ test.describe("Authentication Flow", () => {
     await expect(page.getByTestId("feature-move-on")).toBeVisible();
   });
 
-  test("handles successful authentication flow", async ({ page, context }) => {
+  test("handles successful authentication flow with dashboard redirect", async ({
+    page,
+    context,
+  }) => {
+    // Mock the callback endpoint
+    await page.route("**/api/auth/callback*", async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({ success: true }),
+      });
+    });
+
     // Set auth cookie
     await context.addCookies([
       {
@@ -68,12 +80,26 @@ test.describe("Authentication Flow", () => {
       });
     });
 
-    await page.goto("/?login=success");
+    // Go to the callback page with a code
+    await page.goto("/callback?code=mock-auth-code");
 
-    // Verify user profile is shown
+    // Verify we get redirected to the dashboard
+    await page.waitForURL("**/dashboard");
+
+    // Verify dashboard elements are visible
+    await expect(
+      page.getByRole("heading", { name: "Welcome, Test User!" })
+    ).toBeVisible();
+    await expect(page.getByAltText("QT Mascot")).toBeVisible();
+    await expect(
+      page.getByText("What song is stuck in your head?")
+    ).toBeVisible();
+
+    // Verify user profile is shown in the header
     await expect(page.getByTestId("user-profile")).toBeVisible();
-    await expect(page.getByText("Test User")).toBeVisible();
-    await expect(page.getByTestId("spotify-login-button")).not.toBeVisible();
+    await expect(
+      page.getByTestId("user-profile").getByText("Test User")
+    ).toBeVisible();
   });
 
   test("handles failed authentication", async ({ page }) => {
@@ -116,7 +142,7 @@ test.describe("Authentication Flow", () => {
     // Wait for user profile to be rendered
     const userProfile = page.getByTestId("user-profile");
     await expect(userProfile).toBeVisible();
-    await expect(page.getByText("Test User")).toBeVisible();
+    await expect(userProfile.getByText("Test User")).toBeVisible();
 
     // Mock logout endpoint
     await page.route("**/api/auth/logout", async (route) => {
@@ -160,5 +186,44 @@ test.describe("Authentication Flow", () => {
       await page.goto(`/?${scenario.param}`);
       await expect(page.getByText(scenario.expected)).toBeVisible();
     }
+  });
+
+  test("redirects to dashboard from callback on successful login", async ({
+    page,
+  }) => {
+    // Mock the callback endpoint
+    await page.route("**/api/auth/callback*", async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({ success: true }),
+      });
+    });
+
+    // Mock successful profile fetch for dashboard
+    await page.route("**/api/auth/me", async (route) => {
+      await route.fulfill({
+        status: 200,
+        body: JSON.stringify({
+          success: true,
+          user: {
+            id: "test-user",
+            display_name: "Test User",
+            images: [{ url: "https://example.com/avatar.jpg" }],
+          },
+        }),
+      });
+    });
+
+    // Go to the callback page with a code
+    await page.goto("/callback?code=mock-auth-code");
+
+    // Verify we get redirected to the dashboard
+    await page.waitForURL("**/dashboard");
+
+    // Verify we're on the dashboard page
+    await expect(
+      page.getByText("What song is stuck in your head?")
+    ).toBeVisible();
   });
 });

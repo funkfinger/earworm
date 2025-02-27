@@ -32,8 +32,8 @@ export default function CallbackPage() {
           throw new Error(data.error);
         }
 
-        // Successful login, redirect to home with user data
-        router.push("/?login=success");
+        // Successful login, redirect to dashboard instead of home
+        router.push("/dashboard");
       } catch (error) {
         console.error("Callback error:", error);
         router.push("/?error=token_exchange_failed");

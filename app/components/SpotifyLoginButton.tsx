@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { initiateSpotifyLogin } from "@/app/actions/auth";
+import ErrorBoundary from "./ErrorBoundary";
 
 interface SpotifyLoginButtonProps {
   onLogin?: (result: { success: true; url: string }) => void;
@@ -54,7 +55,8 @@ export default function SpotifyLoginButton({
   const hasError = error.length > 0 || externalError;
   const errorMessageToShow = error || externalErrorMessage;
 
-  return (
+  // The actual button component that will be wrapped with ErrorBoundary
+  const SpotifyButton = () => (
     <div className="flex flex-col items-center gap-2">
       <button
         onClick={handleLogin}
@@ -110,5 +112,32 @@ export default function SpotifyLoginButton({
         <p className="text-red-500 text-sm">{errorMessageToShow}</p>
       )}
     </div>
+  );
+
+  return (
+    <ErrorBoundary
+      fallback={(error, reset) => (
+        <div className="flex flex-col items-center gap-2">
+          <button
+            onClick={reset}
+            data-testid="spotify-login-error-button"
+            className="flex items-center gap-2 px-6 py-3 rounded-full font-semibold text-white bg-red-500 hover:bg-red-600 transition-all duration-200"
+          >
+            Retry Spotify Login
+          </button>
+          <p className="text-red-500 text-sm">
+            {error.message || "An error occurred with Spotify login"}
+          </p>
+        </div>
+      )}
+      onError={(error) => {
+        console.error(
+          "SpotifyLoginButton ErrorBoundary caught an error:",
+          error
+        );
+      }}
+    >
+      <SpotifyButton />
+    </ErrorBoundary>
   );
 }

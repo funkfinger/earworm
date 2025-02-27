@@ -1,76 +1,85 @@
-import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
-
-const SPOTIFY_TOKEN_ENDPOINT = "https://accounts.spotify.com/api/token";
+import { NextResponse } from "next/server";
 
 async function exchangeCodeForToken(code: string) {
-  const params = new URLSearchParams({
-    grant_type: "authorization_code",
-    code,
-    redirect_uri: process.env.NEXT_PUBLIC_SPOTIFY_REDIRECT_URI || "",
-  });
+  const clientId = process.env.NEXT_PUBLIC_SPOTIFY_CLIENT_ID;
+  const clientSecret = process.env.SPOTIFY_CLIENT_SECRET;
+  const redirectUri = process.env.NEXT_PUBLIC_SPOTIFY_REDIRECT_URI;
 
-  const response = await fetch(SPOTIFY_TOKEN_ENDPOINT, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/x-www-form-urlencoded",
-      Authorization:
-        "Basic " +
-        Buffer.from(
-          `${process.env.NEXT_PUBLIC_SPOTIFY_CLIENT_ID}:${process.env.SPOTIFY_CLIENT_SECRET}`
-        ).toString("base64"),
-    },
-    body: params.toString(),
-  });
-
-  if (!response.ok) {
-    throw new Error("Failed to exchange code for token");
+  if (!clientId || !clientSecret || !redirectUri) {
+    throw new Error("Missing environment variables for Spotify authentication");
   }
 
-  return response.json();
+  const params = new URLSearchParams();
+  params.append("grant_type", "authorization_code");
+  params.append("code", code);
+  params.append("redirect_uri", redirectUri);
+
+  try {
+    const response = await fetch("https://accounts.spotify.com/api/token", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+        Authorization: `Basic ${Buffer.from(
+          `${clientId}:${clientSecret}`
+        ).toString("base64")}`,
+      },
+      body: params,
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      console.error("Token exchange error:", errorData);
+      throw new Error(`Failed to exchange code: ${errorData.error}`);
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error("Token exchange error:", error);
+    throw error;
+  }
 }
 
 export async function GET(request: Request) {
+  const { searchParams } = new URL(request.url);
+  const code = searchParams.get("code");
+
+  if (!code) {
+    return NextResponse.json(
+      { success: false, error: "No authorization code provided" },
+      { status: 400 }
+    );
+  }
+
   try {
-    const { searchParams } = new URL(request.url);
-    const code = searchParams.get("code");
-
-    if (!code) {
-      throw new Error("No authorization code received");
-    }
-
     const tokenData = await exchangeCodeForToken(code);
+    const cookieStore = await cookies();
 
     // Store the access token in a cookie
-    const cookieStore = await cookies();
     cookieStore.set("spotify_token", tokenData.access_token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-      path: "/",
-      // Set expiry based on Spotify's expiry time
       maxAge: tokenData.expires_in,
+      path: "/",
     });
 
-    // Also store refresh token if provided
+    // Store the refresh token in a cookie if available
     if (tokenData.refresh_token) {
       cookieStore.set("spotify_refresh_token", tokenData.refresh_token, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
-        sameSite: "lax",
+        // Refresh tokens don't expire, but we'll set a long expiry
+        maxAge: 60 * 60 * 24 * 30, // 30 days
         path: "/",
       });
     }
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("Auth callback error:", error);
+    console.error("Callback error:", error);
     return NextResponse.json(
-      {
-        success: false,
-        error: error instanceof Error ? error.message : "Authentication failed",
-      },
-      { status: 401 }
+      { success: false, error: "Failed to exchange code for token" },
+      { status: 500 }
     );
   }
 }

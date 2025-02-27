@@ -121,6 +121,15 @@ export default function Home({ initialUser = null }: HomeProps) {
               <p className="text-yellow-100/60">Free your mind for new music</p>
             </div>
           </div>
+
+          <div className="mt-8 text-center">
+            <a
+              href="/examples/error-boundary"
+              className="inline-block px-6 py-3 bg-pink-600 hover:bg-pink-700 rounded-lg font-medium transition-colors"
+            >
+              View ErrorBoundary Examples
+            </a>
+          </div>
         </div>
       </div>
     </div>
