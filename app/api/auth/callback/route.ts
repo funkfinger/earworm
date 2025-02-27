@@ -42,7 +42,7 @@ export async function GET(request: Request) {
     const tokenData = await exchangeCodeForToken(code);
 
     // Store the access token in a cookie
-    const cookieStore = cookies();
+    const cookieStore = await cookies();
     cookieStore.set("spotify_token", tokenData.access_token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",

@@ -1,4 +1,10 @@
-import { render, screen, fireEvent, cleanup } from "@testing-library/react";
+import {
+  render,
+  screen,
+  fireEvent,
+  cleanup,
+  waitFor,
+} from "@testing-library/react";
 import { expect, test, vi, beforeEach } from "vitest";
 import SpotifyLoginButton from "@/app/components/SpotifyLoginButton";
 import * as auth from "@/app/actions/auth";
@@ -31,16 +37,35 @@ test("handles click event", async () => {
     success: true as const,
     url: "https://spotify.com/auth",
   };
-  vi.mocked(auth.initiateSpotifyLogin).mockResolvedValue(mockAuthResponse);
+
+  // Setup the mock to return a promise that we can control
+  const authPromise = Promise.resolve(mockAuthResponse);
+  vi.mocked(auth.initiateSpotifyLogin).mockReturnValue(authPromise);
 
   const mockLoginFn = vi.fn();
   render(<SpotifyLoginButton onLogin={mockLoginFn} />);
 
   const button = screen.getByTestId("spotify-login-button");
-  await fireEvent.click(button);
 
-  expect(auth.initiateSpotifyLogin).toHaveBeenCalledTimes(1);
-  expect(mockLoginFn).toHaveBeenCalledTimes(1);
+  // Click the button and wait for loading state
+  fireEvent.click(button);
+  await waitFor(() => {
+    expect(screen.getByTestId("loading-spinner")).toBeInTheDocument();
+  });
+
+  // Wait for the auth promise to resolve
+  await authPromise;
+
+  // Verify the final state
+  await waitFor(() => {
+    expect(auth.initiateSpotifyLogin).toHaveBeenCalledTimes(1);
+    expect(mockLoginFn).toHaveBeenCalledTimes(1);
+    expect(mockLoginFn).toHaveBeenCalledWith(mockAuthResponse);
+  });
+
+  // Verify the button is still visible (since navigation is prevented in test)
+  expect(button).toBeInTheDocument();
+  expect(button).not.toBeDisabled();
 });
 
 test("shows loading state when isLoading is true", () => {
@@ -62,18 +87,31 @@ test("shows error state when hasError is true", () => {
 
 test("handles auth failure", async () => {
   // Mock failed auth response
-  const mockError = "Failed to connect to Spotify";
-  vi.mocked(auth.initiateSpotifyLogin).mockResolvedValue({
+  const mockError = "Missing Spotify client ID";
+  const authPromise = Promise.resolve({
     success: false as const,
     error: mockError,
   });
+  vi.mocked(auth.initiateSpotifyLogin).mockReturnValue(authPromise);
 
   render(<SpotifyLoginButton />);
 
   const button = screen.getByTestId("spotify-login-button");
-  await fireEvent.click(button);
+  fireEvent.click(button);
 
-  // Wait for the error message to appear
-  const errorMessage = await screen.findByText("Failed to connect to Spotify");
-  expect(errorMessage).toBeInTheDocument();
+  // Wait for loading state
+  await waitFor(() => {
+    expect(screen.getByTestId("loading-spinner")).toBeInTheDocument();
+  });
+
+  // Wait for the auth promise to resolve
+  await authPromise;
+
+  // Wait for error state
+  await waitFor(() => {
+    const errorMessage = screen.getByText(mockError);
+    expect(errorMessage).toBeInTheDocument();
+    expect(button).toHaveTextContent("Try Again");
+    expect(button).toHaveClass("bg-red-500");
+  });
 });

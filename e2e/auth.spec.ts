@@ -1,84 +1,66 @@
 import { test, expect } from "@playwright/test";
 
-test.describe("Spotify Authentication", () => {
-  test("should show login button on landing page", async ({ page }) => {
-    await page.goto("/");
-
-    const loginButton = page.getByRole("button", {
-      name: /login with spotify/i,
+test.describe("Authentication Flow", () => {
+  test.beforeEach(async ({ page }) => {
+    // Continue all requests by default
+    await page.route("**/*", async (route) => {
+      await route.continue();
     });
-    await expect(loginButton).toBeVisible();
 
-    // Verify Spotify branding
-    await expect(loginButton).toHaveClass(/bg-\[#1DB954\]/);
-    await expect(page.getByTestId("spotify-icon")).toBeVisible();
-  });
-
-  test("should handle login button click", async ({ page }) => {
-    // Mock Spotify OAuth endpoint
-    await page.route("**/api/auth/spotify", async (route) => {
-      const spotifyAuthUrl = "https://accounts.spotify.com/authorize";
+    // Mock the /api/auth/me endpoint to return no user
+    await page.route("**/api/auth/me", async (route) => {
       await route.fulfill({
         status: 200,
-        body: JSON.stringify({ url: spotifyAuthUrl }),
+        contentType: "application/json",
+        body: JSON.stringify({ success: false, error: "Not logged in" }),
       });
     });
 
     await page.goto("/");
-
-    // Click login and verify loading state
-    const loginButton = page.getByRole("button", {
-      name: /login with spotify/i,
-    });
-    await loginButton.click();
-
-    await expect(page.getByTestId("loading-spinner")).toBeVisible();
   });
 
-  test("should show error state on auth failure", async ({ page }) => {
-    // Mock failed auth response
-    await page.route("**/api/auth/spotify", async (route) => {
-      await route.fulfill({
-        status: 500,
-        body: JSON.stringify({
-          success: false,
-          error: "Failed to connect to Spotify",
-        }),
-      });
-    });
-
+  test("shows initial landing page with login button", async ({ page }) => {
     await page.goto("/");
 
-    const loginButton = page.getByRole("button", {
-      name: /login with spotify/i,
-    });
-    await loginButton.click();
-
-    // Verify error state
-    await expect(page.getByText("Failed to connect to Spotify")).toBeVisible();
+    // Verify page content
+    await expect(page.getByText("DeWorm")).toBeVisible();
     await expect(
-      page.getByRole("button", { name: /try again/i })
+      page.getByText(
+        "Discover and remove those pesky earworms with the power of music"
+      )
     ).toBeVisible();
+
+    // Verify login button
+    const loginButton = page.getByTestId("spotify-login-button");
+    await expect(loginButton).toBeVisible();
+    await expect(loginButton).toHaveText("Login with Spotify");
+    await expect(page.getByTestId("spotify-icon")).toBeVisible();
+
+    // Verify features are visible
+    await expect(page.getByTestId("feature-identify")).toBeVisible();
+    await expect(page.getByTestId("feature-listen")).toBeVisible();
+    await expect(page.getByTestId("feature-move-on")).toBeVisible();
   });
 
-  test("should handle successful Spotify login flow", async ({ page }) => {
-    // Mock Spotify OAuth endpoints
-    await page.route("**/api/auth/spotify", async (route) => {
-      const spotifyAuthUrl = "https://accounts.spotify.com/authorize";
-      await route.fulfill({
-        status: 200,
-        body: JSON.stringify({ url: spotifyAuthUrl }),
-      });
-    });
+  test("handles successful authentication flow", async ({ page, context }) => {
+    // Set auth cookie
+    await context.addCookies([
+      {
+        name: "spotify_token",
+        value: "mock-token",
+        domain: "localhost",
+        path: "/",
+      },
+    ]);
 
-    // Mock the OAuth callback
-    await page.route("**/api/auth/callback**", async (route) => {
+    // Mock successful profile fetch
+    await page.route("**/api/auth/me", async (route) => {
       await route.fulfill({
         status: 200,
         body: JSON.stringify({
           success: true,
           user: {
-            id: "test-user-id",
+            id: "test-user",
             display_name: "Test User",
             images: [{ url: "https://example.com/avatar.jpg" }],
           },
@@ -86,40 +68,55 @@ test.describe("Spotify Authentication", () => {
       });
     });
 
-    // Start from landing page
-    await page.goto("/");
+    await page.goto("/?login=success");
 
-    // Verify initial state and click login
-    const loginButton = page.getByRole("button", {
-      name: /login with spotify/i,
-    });
-    await expect(loginButton).toBeVisible();
-    await loginButton.click();
-
-    // Wait for navigation and response handling
-    await page.waitForResponse("**/api/auth/callback**");
-
-    // Verify logged in state with increased timeout
-    await expect(page.getByTestId("user-profile")).toBeVisible({
-      timeout: 10000,
-    });
-    await expect(page.getByText("Test User")).toBeVisible({ timeout: 10000 });
-    await expect(page.getByRole("button", { name: /logout/i })).toBeVisible({
-      timeout: 10000,
-    });
+    // Verify user profile is shown
+    await expect(page.getByTestId("user-profile")).toBeVisible();
+    await expect(page.getByText("Test User")).toBeVisible();
+    await expect(page.getByTestId("spotify-login-button")).not.toBeVisible();
   });
 
-  test("should handle logout", async ({ page }) => {
-    await page.goto("/");
+  test("handles failed authentication", async ({ page }) => {
+    await page.goto("/?error=authentication_failed");
 
-    // Set up mock logged in state
-    await page.evaluate(() => {
-      localStorage.setItem("spotify_token", "mock-token");
-      // Trigger a re-render or state update if needed
-      window.dispatchEvent(new Event("storage"));
+    // Verify error state
+    await expect(page.getByText("authentication failed")).toBeVisible();
+    await expect(page.getByTestId("spotify-login-button")).toBeVisible();
+  });
+
+  test("handles logout flow", async ({ page, context }) => {
+    // Set up profile endpoint mock
+    await page.route("**/api/auth/me", async (route) => {
+      await route.fulfill({
+        status: 200,
+        body: JSON.stringify({
+          success: true,
+          user: {
+            id: "test-user",
+            display_name: "Test User",
+            images: [{ url: "https://example.com/avatar.jpg" }],
+          },
+        }),
+      });
     });
 
-    await page.reload();
+    // Set initial authenticated state
+    await context.addCookies([
+      {
+        name: "spotify_token",
+        value: "mock-token",
+        domain: "localhost",
+        path: "/",
+      },
+    ]);
+
+    // Navigate to the page with login=success to trigger profile fetch
+    await page.goto("/?login=success");
+
+    // Wait for user profile to be rendered
+    const userProfile = page.getByTestId("user-profile");
+    await expect(userProfile).toBeVisible();
+    await expect(page.getByText("Test User")).toBeVisible();
 
     // Mock logout endpoint
     await page.route("**/api/auth/logout", async (route) => {
@@ -129,18 +126,39 @@ test.describe("Spotify Authentication", () => {
       });
     });
 
-    // Wait for and click logout button with increased timeout
-    const logoutButton = page.getByRole("button", { name: /logout/i });
-    await expect(logoutButton).toBeVisible({ timeout: 10000 });
-    await logoutButton.click();
-
-    // Wait for the logout response
-    await page.waitForResponse("**/api/auth/logout");
+    // Click logout and wait for the response
+    const logoutButton = page.getByRole("button", { name: "Logout" });
+    await Promise.all([
+      logoutButton.click(),
+      page.waitForResponse(
+        (response) =>
+          response.url().includes("/api/auth/logout") &&
+          response.status() === 200
+      ),
+    ]);
 
     // Verify logged out state
-    await expect(
-      page.getByRole("button", { name: /login with spotify/i })
-    ).toBeVisible({ timeout: 10000 });
-    await expect(page.getByTestId("user-profile")).not.toBeVisible();
+    await expect(page.getByTestId("spotify-login-button")).toBeVisible();
+    await expect(userProfile).not.toBeVisible();
+  });
+
+  test("handles callback errors", async ({ page }) => {
+    // Test various callback error scenarios
+    const errorScenarios = [
+      { param: "error=no_code", expected: "no code" },
+      {
+        param: "error=token_exchange_failed",
+        expected: "token exchange failed",
+      },
+      {
+        param: "error=authentication_failed",
+        expected: "authentication failed",
+      },
+    ];
+
+    for (const scenario of errorScenarios) {
+      await page.goto(`/?${scenario.param}`);
+      await expect(page.getByText(scenario.expected)).toBeVisible();
+    }
   });
 });

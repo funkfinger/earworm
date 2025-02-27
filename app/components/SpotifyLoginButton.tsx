@@ -4,7 +4,7 @@ import { useState } from "react";
 import { initiateSpotifyLogin } from "@/app/actions/auth";
 
 interface SpotifyLoginButtonProps {
-  onLogin?: () => void;
+  onLogin?: (result: { success: true; url: string }) => void;
   isLoading?: boolean;
   hasError?: boolean;
   errorMessage?: string;
@@ -24,17 +24,22 @@ export default function SpotifyLoginButton({
       setIsLoading(true);
       setError("");
 
+      // Add a small delay to ensure state updates are processed
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
       const result = await initiateSpotifyLogin();
 
       if (!result.success) {
         throw new Error(result.error);
       }
 
-      // Call onLogin before redirect
-      onLogin?.();
+      // Call onLogin with the successful result
+      onLogin?.(result);
 
       // Redirect to Spotify auth page
-      window.location.href = result.url;
+      if (typeof window !== "undefined") {
+        window.location.href = result.url;
+      }
     } catch (err) {
       console.error("Login failed:", err);
       setError(
