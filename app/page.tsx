@@ -1,21 +1,4 @@
-"use client";
-
-import { useEffect, useState } from "react";
-import SpotifyLogin from "./components/SpotifyLogin";
-import { getValidToken } from "./actions/auth";
-
 export default function Home() {
-  const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null);
-
-  useEffect(() => {
-    const checkLoginStatus = async () => {
-      const token = await getValidToken();
-      setIsLoggedIn(!!token);
-    };
-
-    checkLoginStatus();
-  }, []);
-
   return (
     <div className="min-h-screen bg-[#2A1810] text-white">
       <div className="container mx-auto px-4 py-16">
@@ -24,16 +7,14 @@ export default function Home() {
             DeWorm
           </h1>
           <p className="text-xl text-yellow-100/80">
-            Discover and remove those pesky earworms with the power of Spotify
+            Discover and remove those pesky earworms with the power of music
           </p>
-          {isLoggedIn === false && (
-            <div className="mt-8">
-              <SpotifyLogin />
-            </div>
-          )}
           <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="bg-[#3C2218] p-6 rounded-lg border border-pink-500/20 hover:border-pink-500/40 transition-colors">
-              <h2 className="text-pink-400 text-lg font-semibold mb-2">
+              <h2
+                data-testid="feature-identify"
+                className="text-pink-400 text-lg font-semibold mb-2"
+              >
                 Identify
               </h2>
               <p className="text-yellow-100/60">
@@ -41,13 +22,19 @@ export default function Home() {
               </p>
             </div>
             <div className="bg-[#3C2218] p-6 rounded-lg border border-yellow-500/20 hover:border-yellow-500/40 transition-colors">
-              <h2 className="text-yellow-400 text-lg font-semibold mb-2">
+              <h2
+                data-testid="feature-listen"
+                className="text-yellow-400 text-lg font-semibold mb-2"
+              >
                 Listen
               </h2>
               <p className="text-yellow-100/60">Play it out of your system</p>
             </div>
             <div className="bg-[#3C2218] p-6 rounded-lg border border-pink-500/20 hover:border-pink-500/40 transition-colors">
-              <h2 className="text-pink-400 text-lg font-semibold mb-2">
+              <h2
+                data-testid="feature-move-on"
+                className="text-pink-400 text-lg font-semibold mb-2"
+              >
                 Move On
               </h2>
               <p className="text-yellow-100/60">Free your mind for new music</p>

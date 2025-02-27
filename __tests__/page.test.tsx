@@ -1,46 +1,29 @@
-import { expect, test, vi, beforeEach, afterEach } from "vitest";
-import { render, screen, waitFor, cleanup } from "@testing-library/react";
+import { expect, test, beforeEach } from "vitest";
+import { render, screen, cleanup } from "@testing-library/react";
 import Page from "../app/page";
-import { getValidToken } from "../app/actions/auth";
-
-vi.mock("../app/actions/auth", () => ({
-  getValidToken: vi.fn(),
-}));
 
 beforeEach(() => {
   cleanup();
-  vi.clearAllMocks();
 });
 
-afterEach(() => {
-  cleanup();
-});
-
-test("Page renders heading", () => {
+test("renders the main heading", () => {
   render(<Page />);
-  expect(
-    screen.getByRole("heading", { level: 1, name: "DeWorm" })
-  ).toBeDefined();
+  const heading = screen.getByRole("heading", { level: 1, name: "DeWorm" });
+  expect(heading).toBeInTheDocument();
 });
 
-test("Shows login button when user is not logged in", async () => {
-  vi.mocked(getValidToken).mockResolvedValueOnce(null);
+test("renders the feature cards", () => {
   render(<Page />);
+  const identifyCard = screen.getByTestId("feature-identify");
+  const listenCard = screen.getByTestId("feature-listen");
+  const moveOnCard = screen.getByTestId("feature-move-on");
 
-  await waitFor(() => {
-    expect(
-      screen.getByRole("button", { name: /login with spotify/i })
-    ).toBeDefined();
-  });
-});
+  expect(identifyCard).toBeInTheDocument();
+  expect(identifyCard.textContent).toContain("Identify");
 
-test("Hides login button when user is logged in", async () => {
-  vi.mocked(getValidToken).mockResolvedValueOnce("mock-token");
-  render(<Page />);
+  expect(listenCard).toBeInTheDocument();
+  expect(listenCard.textContent).toContain("Listen");
 
-  await waitFor(() => {
-    expect(
-      screen.queryByRole("button", { name: /login with spotify/i })
-    ).toBeNull();
-  });
+  expect(moveOnCard).toBeInTheDocument();
+  expect(moveOnCard.textContent).toContain("Move On");
 });
