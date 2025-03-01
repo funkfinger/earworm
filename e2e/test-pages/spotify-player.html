@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Spotify Player Test</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #2a1810;
+        color: white;
+        padding: 20px;
+      }
+      .player {
+        background-color: #3c2218;
+        padding: 20px;
+        border-radius: 8px;
+        border: 1px solid rgba(0, 128, 0, 0.2);
+        margin-bottom: 20px;
+        max-width: 600px;
+      }
+      .error {
+        background-color: rgba(255, 0, 0, 0.2);
+        padding: 10px;
+        border-radius: 4px;
+        border: 1px solid rgba(255, 0, 0, 0.3);
+        margin-top: 10px;
+      }
+      button {
+        background-color: #1db954;
+        color: white;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 4px;
+        cursor: pointer;
+        margin-top: 10px;
+      }
+      button:hover {
+        background-color: #1ed760;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Spotify Player Test Page</h1>
+
+    <div class="player" data-testid="spotify-player">
+      <h2>No Active Device</h2>
+      <div class="error">
+        No active Spotify device found. Please open Spotify on another device.
+      </div>
+      <button>Refresh Devices</button>
+    </div>
+
+    <div class="player" data-testid="spotify-player-premium">
+      <h2>Premium Required</h2>
+      <div class="error">
+        This functionality is restricted to premium users only.
+        <p>The Spotify Web Playback SDK requires a Spotify Premium account.</p>
+      </div>
+      <button>Upgrade to Premium</button>
+    </div>
+
+    <div class="player" data-testid="spotify-player-no-list">
+      <h2>No List Loaded</h2>
+      <div class="error">
+        Cannot perform operation; no list was loaded. Please try refreshing the
+        page.
+      </div>
+      <button>Refresh</button>
+    </div>
+  </body>
+</html>

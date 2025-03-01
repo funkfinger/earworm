@@ -205,10 +205,12 @@ export default function Dashboard() {
                     Your selected earworm:
                   </h4>
                   <div className="flex items-center">
-                    <img
+                    <Image
                       src={selectedTrack.album.images[0]?.url}
                       alt={selectedTrack.album.name}
-                      className="w-16 h-16 rounded mr-4"
+                      className="rounded mr-4"
+                      width={64}
+                      height={64}
                     />
                     <div>
                       <div className="font-medium text-white">

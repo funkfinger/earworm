@@ -1,5 +1,15 @@
 const SPOTIFY_AUTH_ENDPOINT = "https://accounts.spotify.com/authorize";
-const SPOTIFY_SCOPES = ["user-read-email", "playlist-modify-public"].join(" ");
+const SPOTIFY_SCOPES = [
+  "user-read-private",
+  "user-read-email",
+  "playlist-read-private",
+  "playlist-modify-public",
+  "playlist-modify-private",
+  "streaming",
+  "user-read-playback-state",
+  "user-modify-playback-state",
+  "user-read-currently-playing",
+].join(" ");
 
 export async function getAuthUrl() {
   const params = new URLSearchParams({

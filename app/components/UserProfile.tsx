@@ -1,5 +1,7 @@
 "use client";
 
+import Image from "next/image";
+
 interface UserProfileProps {
   user: {
     display_name: string;
@@ -12,10 +14,12 @@ export default function UserProfile({ user, onLogout }: UserProfileProps) {
   return (
     <div data-testid="user-profile" className="flex items-center gap-4">
       {user.images[0] && (
-        <img
+        <Image
           src={user.images[0].url}
           alt={user.display_name}
-          className="w-10 h-10 rounded-full"
+          className="rounded-full"
+          width={40}
+          height={40}
         />
       )}
       <span className="font-medium text-white">{user.display_name}</span>

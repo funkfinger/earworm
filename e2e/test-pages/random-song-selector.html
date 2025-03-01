@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Random Song Selector Test</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #2a1810;
+        color: white;
+        padding: 20px;
+      }
+      .selector {
+        background-color: #3c2218;
+        padding: 20px;
+        border-radius: 8px;
+        border: 1px solid rgba(255, 255, 0, 0.2);
+        margin-bottom: 20px;
+        max-width: 600px;
+      }
+      .track {
+        display: flex;
+        align-items: center;
+        margin-top: 10px;
+      }
+      .track img {
+        width: 64px;
+        height: 64px;
+        border-radius: 4px;
+        margin-right: 16px;
+      }
+      .track-info {
+        flex: 1;
+      }
+      .track-name {
+        font-weight: bold;
+        font-size: 18px;
+      }
+      .artist-name {
+        opacity: 0.8;
+      }
+      .error {
+        background-color: rgba(255, 0, 0, 0.2);
+        padding: 10px;
+        border-radius: 4px;
+        border: 1px solid rgba(255, 0, 0, 0.3);
+        margin-top: 10px;
+      }
+      button {
+        background-color: #1db954;
+        color: white;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 4px;
+        cursor: pointer;
+        margin-top: 10px;
+      }
+      button:hover {
+        background-color: #1ed760;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Random Song Selector Test Page</h1>
+
+    <div class="selector" data-testid="random-song-selector">
+      <h2>Step 3: Replacement Song</h2>
+      <p>Listen to this song to replace your earworm.</p>
+
+      <div class="track">
+        <img src="https://example.com/album.jpg" alt="Album cover" />
+        <div class="track-info">
+          <div class="track-name">Test Track</div>
+          <div class="artist-name">Test Artist</div>
+        </div>
+      </div>
+
+      <button>Get Another Song</button>
+    </div>
+
+    <div class="selector" data-testid="random-song-selector-error">
+      <h2>Step 3: Replacement Song</h2>
+      <p>Listen to this song to replace your earworm.</p>
+
+      <div class="error">
+        Failed to get a random track from the playlist
+        <button>Try Again</button>
+      </div>
+    </div>
+
+    <div class="selector" data-testid="random-song-selector-no-list">
+      <h2>Step 3: Replacement Song</h2>
+      <p>Listen to this song to replace your earworm.</p>
+
+      <div class="error">
+        Cannot perform operation; no list was loaded. Please try refreshing the
+        page.
+        <button>Refresh</button>
+      </div>
+    </div>
+  </body>
+</html>

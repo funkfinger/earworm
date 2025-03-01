@@ -2,8 +2,9 @@
 
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { getAccessToken } from "../lib/spotify/api";
-import RandomSongPlayer from "./RandomSongPlayer";
+import SpotifyWebPlayer from "./SpotifyWebPlayer";
 import React from "react";
+import Image from "next/image";
 
 // Define the Track interface based on what's used in RandomSongPlayer
 interface Track {
@@ -17,7 +18,6 @@ interface Track {
   external_urls: {
     spotify: string;
   };
-  preview_url: string | null;
 }
 
 // Define the PlaylistItem interface
@@ -29,38 +29,6 @@ interface RandomSongSelectorProps {
   seedTrackId: string;
   title?: string;
   description?: string;
-}
-
-// Function to get recommendations based on a seed track
-async function getRecommendations(seedTrackId: string): Promise<Track[]> {
-  try {
-    const token = await getAccessToken();
-    const response = await fetch(
-      `https://api.spotify.com/v1/recommendations?seed_tracks=${seedTrackId}&limit=50`,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
-
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(
-        error.error?.message || "Failed to fetch recommendations"
-      );
-    }
-
-    const data = await response.json();
-    if (!data.tracks || data.tracks.length === 0) {
-      throw new Error("No recommendations found");
-    }
-
-    return data.tracks;
-  } catch (error) {
-    console.error("Error getting recommendations:", error);
-    throw error;
-  }
 }
 
 // Function to get tracks from a playlist
@@ -107,22 +75,17 @@ const RandomSongSelector = React.memo(
         setLoading(true);
         setError("");
         const playlistId = "0E9WYGYWZBqfmp6eJ0Nl1t"; // DeWorm playlist ID
+        console.log("Getting tracks from DeWorm playlist");
         const tracks = await getPlaylistTracks(playlistId);
 
         if (tracks.length === 0) {
           throw new Error("No tracks found in the playlist");
         }
 
-        // Filter tracks with preview URLs
-        const tracksWithPreviews = tracks.filter((track) => track.preview_url);
-
-        // If we have tracks with previews, use those, otherwise use all tracks
-        const tracksToUse =
-          tracksWithPreviews.length > 0 ? tracksWithPreviews : tracks;
-
-        const randomIndex = Math.floor(Math.random() * tracksToUse.length);
-        setRandomTrack(tracksToUse[randomIndex]);
-        return tracksToUse[randomIndex];
+        console.log(`Found ${tracks.length} tracks in playlist`);
+        const randomIndex = Math.floor(Math.random() * tracks.length);
+        setRandomTrack(tracks[randomIndex]);
+        return tracks[randomIndex];
       } catch (error) {
         console.error("Error getting random track from playlist:", error);
         setError("Failed to get a random track from the playlist");
@@ -132,55 +95,37 @@ const RandomSongSelector = React.memo(
       }
     }, []);
 
-    const getRandomTrackFromRecommendations = useCallback(async () => {
-      if (!seedTrackId) return null;
-
+    const getRandomTrack = useCallback(async () => {
       try {
-        setLoading(true);
-        setError("");
-        const recommendations = await getRecommendations(seedTrackId);
+        console.log("Getting a random track from the DeWorm playlist");
+        const track = await getRandomTrackFromPlaylist();
 
-        if (recommendations.length === 0) {
-          throw new Error("No recommendations found");
+        if (!track) {
+          setError(
+            "Could not find a replacement song. Please try again later."
+          );
+        } else {
+          console.log("Successfully found replacement track:", track.name);
         }
 
-        // Filter tracks with preview URLs
-        const tracksWithPreviews = recommendations.filter(
-          (track) => track.preview_url
-        );
+        setHasInitialized(true);
+        return track;
+      } catch (err) {
+        console.error("Error in getRandomTrack:", err);
 
-        // If we have tracks with previews, use those, otherwise use all tracks
-        const tracksToUse =
-          tracksWithPreviews.length > 0 ? tracksWithPreviews : recommendations;
+        // Check for specific error messages
+        if (err instanceof Error && err.message.includes("item_before_load")) {
+          setError(
+            "Cannot perform operation; no list was loaded. Please try refreshing the page."
+          );
+        } else {
+          setError("An unexpected error occurred. Please try again.");
+        }
 
-        const randomIndex = Math.floor(Math.random() * tracksToUse.length);
-        setRandomTrack(tracksToUse[randomIndex]);
-        return tracksToUse[randomIndex];
-      } catch (error) {
-        console.error(
-          "Error getting random track from recommendations:",
-          error
-        );
+        setHasInitialized(true);
         return null;
-      } finally {
-        setLoading(false);
       }
-    }, [seedTrackId]);
-
-    const getRandomTrack = useCallback(async () => {
-      let track = await getRandomTrackFromRecommendations();
-
-      if (!track) {
-        track = await getRandomTrackFromPlaylist();
-      }
-
-      if (!track) {
-        setError("Could not find a replacement song. Please try again later.");
-      }
-
-      setHasInitialized(true);
-      return track;
-    }, [getRandomTrackFromRecommendations, getRandomTrackFromPlaylist]);
+    }, [getRandomTrackFromPlaylist]);
 
     useEffect(() => {
       if (seedTrackId && !hasInitialized) {
@@ -223,10 +168,18 @@ const RandomSongSelector = React.memo(
         return (
           <div className="space-y-4">
             <div className="flex items-center">
-              <img
-                src={randomTrack.album.images[0]?.url}
-                alt={randomTrack.album.name}
-                className="w-16 h-16 rounded mr-4"
+              <Image
+                src={
+                  randomTrack.album.images[0]?.url || "/placeholder-album.svg"
+                }
+                alt={randomTrack.album.name || "Album cover"}
+                className="rounded mr-4"
+                width={64}
+                height={64}
+                onError={(e) => {
+                  console.error("Error loading album image, using placeholder");
+                  (e.target as HTMLImageElement).src = "/placeholder-album.svg";
+                }}
               />
               <div>
                 <div className="font-medium text-white">{randomTrack.name}</div>
@@ -239,6 +192,7 @@ const RandomSongSelector = React.memo(
                 className="ml-auto p-2 text-yellow-300 hover:text-yellow-100"
                 aria-label="Get another song"
                 title="Get another song"
+                data-testid="refresh-button"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -255,7 +209,11 @@ const RandomSongSelector = React.memo(
               </button>
             </div>
 
-            <RandomSongPlayer trackId={randomTrack.id} />
+            <div className="mt-2 text-center text-xs text-yellow-100/60">
+              <p>Full playback powered by Spotify Premium</p>
+            </div>
+
+            <SpotifyWebPlayer trackId={randomTrack.id} />
           </div>
         );
       }
@@ -264,7 +222,10 @@ const RandomSongSelector = React.memo(
     }, [loading, error, randomTrack, handleRefresh]);
 
     return (
-      <div className="bg-[#3C2218] p-6 rounded-lg border border-yellow-500/20">
+      <div
+        className="bg-[#3C2218] p-6 rounded-lg border border-yellow-500/20"
+        data-testid="random-song-selector"
+      >
         {title && (
           <h3 className="text-xl font-semibold text-yellow-400 mb-2">
             {title}

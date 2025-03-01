@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef } from "react";
+import Image from "next/image";
 
 interface Track {
   id: string;
@@ -113,10 +114,12 @@ export default function TrackSearchResults({
           aria-selected="false"
           data-testid={`track-result-${track.id}`}
         >
-          <img
-            src={track.album.images[0]?.url || "/placeholder-album.jpg"}
+          <Image
+            src={track.album.images[0]?.url || "/placeholder-album.svg"}
             alt={track.album.name}
-            className="w-12 h-12 rounded mr-3"
+            className="rounded mr-3"
+            width={48}
+            height={48}
             data-testid={`track-image-${track.id}`}
           />
           <div className="flex-1 min-w-0">

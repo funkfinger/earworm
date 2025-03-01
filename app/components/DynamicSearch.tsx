@@ -90,12 +90,12 @@ const DynamicSearch = ({ onSelectTrack, onError }: DynamicSearchProps) => {
   );
 
   // Create a debounced version of the search function
-  const debouncedSearch = useCallback(
-    debounceStringInput(function (query: string) {
-      performSearch(query);
-    }, 300),
-    [performSearch]
-  );
+  const debouncedSearch = useCallback((query: string) => {
+    const debouncedFn = debounceStringInput((q: string) => {
+      performSearch(q);
+    }, 300);
+    debouncedFn(query);
+  }, [performSearch]);
 
   // Handle input change with debounced search
   const handleInputChange = useCallback(
@@ -171,7 +171,6 @@ const DynamicSearch = ({ onSelectTrack, onError }: DynamicSearchProps) => {
           aria-label="Search for songs"
           aria-autocomplete="list"
           aria-controls="search-results-dropdown"
-          aria-expanded={showDropdown}
           data-testid="song-search-input"
         />
         <button

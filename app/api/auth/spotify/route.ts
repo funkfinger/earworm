@@ -7,6 +7,10 @@ const SPOTIFY_SCOPES = [
   "playlist-read-private",
   "playlist-modify-public",
   "playlist-modify-private",
+  "streaming",
+  "user-read-playback-state",
+  "user-modify-playback-state",
+  "user-read-currently-playing",
 ].join(" ");
 
 export async function GET() {

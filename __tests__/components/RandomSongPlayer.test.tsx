@@ -94,26 +94,35 @@ test("displays track information when loaded", async ({ expect }) => {
     preview_url: "https://example.com/preview.mp3",
   });
 
-  const { container } = render(<RandomSongPlayer trackId="track1" />);
+  render(<RandomSongPlayer trackId="track1" />);
 
-  // Wait for track information to be displayed using a more specific selector
+  // Wait for track information to be displayed using data-testid
   await waitFor(() => {
-    // Use container query to find the specific element
-    const trackName = container.querySelector(".font-medium.text-white");
+    const trackName = screen.getByTestId("track-name");
     expect(trackName).toBeInTheDocument();
-    expect(trackName?.textContent).toBe("Test Track");
+    expect(trackName.textContent).toBe("Test Track");
   });
 
-  // Check for artist name using a more specific selector
-  const artistElement = container.querySelector(".text-yellow-100\\/60");
-  expect(artistElement?.textContent).toBe("Test Artist");
+  // Check for artist name using data-testid
+  const artistElement = screen.getByTestId("track-artist");
+  expect(artistElement.textContent).toBe("Test Artist");
 
-  // Check for Spotify link
-  const spotifyLink = screen.getByText("Listen on Spotify");
-  expect(spotifyLink).toHaveAttribute(
-    "href",
-    "https://open.spotify.com/track/123"
+  // Check for album image
+  const albumImage = screen.getByTestId("track-album-image");
+  expect(albumImage).toHaveAttribute("src", "https://example.com/album.jpg");
+
+  // Check for audio element
+  const audioElement = screen.getByTestId("audio-element");
+  expect(audioElement).toBeInTheDocument();
+  expect(audioElement).toHaveAttribute(
+    "src",
+    "https://example.com/preview.mp3"
   );
+
+  // Check for playback button
+  const playButton = screen.getByTestId("playback-button");
+  expect(playButton).toBeInTheDocument();
+  expect(playButton).toHaveAttribute("aria-label", "Play");
 });
 
 test("handles tracks without preview URLs", async ({ expect }) => {
@@ -132,23 +141,32 @@ test("handles tracks without preview URLs", async ({ expect }) => {
     preview_url: null,
   });
 
-  const { container } = render(<RandomSongPlayer trackId="track1" />);
+  render(<RandomSongPlayer trackId="track1" />);
 
-  // Wait for track information to be displayed using a more specific selector
+  // Wait for track information to be displayed
   await waitFor(() => {
-    const trackName = container.querySelector(".font-medium.text-white");
+    const trackName = screen.getByTestId("track-name");
     expect(trackName).toBeInTheDocument();
-    expect(trackName?.textContent).toBe("Test Track");
+    expect(trackName.textContent).toBe("Test Track");
   });
 
   // Check for preview not available message
-  const previewMessage = screen.getByText(
+  const previewMessage = screen.getByTestId("no-preview-message");
+  expect(previewMessage).toBeInTheDocument();
+  expect(previewMessage.textContent).toBe(
     "Preview not available for this track"
   );
-  expect(previewMessage).toBeInTheDocument();
 
   // Play button should not be present
-  expect(screen.queryByLabelText("Play")).not.toBeInTheDocument();
+  expect(screen.queryByTestId("playback-button")).not.toBeInTheDocument();
+
+  // Spotify link should be present
+  const spotifyLink = screen.getByTestId("spotify-link");
+  expect(spotifyLink).toBeInTheDocument();
+  expect(spotifyLink).toHaveAttribute(
+    "href",
+    "https://open.spotify.com/track/123"
+  );
 });
 
 test("toggles play/pause when button is clicked", async ({ expect }) => {
@@ -167,18 +185,19 @@ test("toggles play/pause when button is clicked", async ({ expect }) => {
     preview_url: "https://example.com/preview.mp3",
   });
 
-  const { container } = render(<RandomSongPlayer trackId="track1" />);
+  render(<RandomSongPlayer trackId="track1" />);
 
-  // Wait for track information to be displayed using a more specific selector
+  // Wait for track information to be displayed
   await waitFor(() => {
-    const trackName = container.querySelector(".font-medium.text-white");
+    const trackName = screen.getByTestId("track-name");
     expect(trackName).toBeInTheDocument();
-    expect(trackName?.textContent).toBe("Test Track");
+    expect(trackName.textContent).toBe("Test Track");
   });
 
   // Find play button
-  const playButton = screen.getByLabelText("Play");
+  const playButton = screen.getByTestId("playback-button");
   expect(playButton).toBeInTheDocument();
+  expect(playButton).toHaveAttribute("aria-label", "Play");
 
   // Click play button
   fireEvent.click(playButton);
@@ -188,15 +207,19 @@ test("toggles play/pause when button is clicked", async ({ expect }) => {
 
   // Wait for pause button to appear
   await waitFor(() => {
-    expect(screen.getByLabelText("Pause")).toBeInTheDocument();
+    expect(playButton).toHaveAttribute("aria-label", "Pause");
   });
 
   // Click pause button
-  const pauseButton = screen.getByLabelText("Pause");
-  fireEvent.click(pauseButton);
+  fireEvent.click(playButton);
 
   // HTMLMediaElement.pause should have been called
   expect(window.HTMLMediaElement.prototype.pause).toHaveBeenCalled();
+
+  // Button should change back to play
+  await waitFor(() => {
+    expect(playButton).toHaveAttribute("aria-label", "Play");
+  });
 });
 
 test("changes volume when slider is adjusted", async ({ expect }) => {
@@ -215,17 +238,17 @@ test("changes volume when slider is adjusted", async ({ expect }) => {
     preview_url: "https://example.com/preview.mp3",
   });
 
-  const { container } = render(<RandomSongPlayer trackId="track1" />);
+  render(<RandomSongPlayer trackId="track1" />);
 
-  // Wait for track information to be displayed using a more specific selector
+  // Wait for track information to be displayed
   await waitFor(() => {
-    const trackName = container.querySelector(".font-medium.text-white");
+    const trackName = screen.getByTestId("track-name");
     expect(trackName).toBeInTheDocument();
-    expect(trackName?.textContent).toBe("Test Track");
+    expect(trackName.textContent).toBe("Test Track");
   });
 
   // Find volume slider
-  const volumeSlider = screen.getByLabelText("Volume");
+  const volumeSlider = screen.getByTestId("volume-slider");
   expect(volumeSlider).toBeInTheDocument();
 
   // Change volume
