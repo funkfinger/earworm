@@ -1,0 +1,69 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: "DynamoDB tables for De Worm app"
+
+Resources:
+  UsersTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: deworm-users
+      AttributeDefinitions:
+        - AttributeName: id
+          AttributeType: S
+      KeySchema:
+        - AttributeName: id
+          KeyType: HASH
+      BillingMode: PAY_PER_REQUEST
+      Tags:
+        - Key: Environment
+          Value: production
+        - Key: Project
+          Value: deworm
+
+  SongsTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: deworm-songs
+      AttributeDefinitions:
+        - AttributeName: id
+          AttributeType: S
+      KeySchema:
+        - AttributeName: id
+          KeyType: HASH
+      BillingMode: PAY_PER_REQUEST
+      Tags:
+        - Key: Environment
+          Value: production
+        - Key: Project
+          Value: deworm
+
+  HistoryTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: deworm-history
+      AttributeDefinitions:
+        - AttributeName: id
+          AttributeType: S
+        - AttributeName: userId
+          AttributeType: S
+      KeySchema:
+        - AttributeName: id
+          KeyType: HASH
+        - AttributeName: userId
+          KeyType: RANGE
+      BillingMode: PAY_PER_REQUEST
+      Tags:
+        - Key: Environment
+          Value: production
+        - Key: Project
+          Value: deworm
+
+Outputs:
+  UsersTableName:
+    Description: Name of the Users table
+    Value: !Ref UsersTable
+  SongsTableName:
+    Description: Name of the Songs table
+    Value: !Ref SongsTable
+  HistoryTableName:
+    Description: Name of the History table
+    Value: !Ref HistoryTable
