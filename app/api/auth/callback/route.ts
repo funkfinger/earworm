@@ -25,18 +25,53 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // In a real implementation, you would:
-    // 1. Validate the state parameter against the one stored in the session/cookie
-    // 2. Exchange the authorization code for an access token
-    // 3. Store the access token and refresh token in a secure way
-    // 4. Redirect to the appropriate page
+    // Exchange the authorization code for tokens
+    const tokenResponse = await fetch(
+      "https://accounts.spotify.com/api/token",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+        body: new URLSearchParams({
+          grant_type: "authorization_code",
+          code,
+          redirect_uri:
+            process.env.SPOTIFY_REDIRECT_URI ||
+            "http://localhost:3000/api/auth/callback",
+        }),
+      }
+    );
 
-    // For now, we'll just redirect to the search page
-    // In a real implementation, you would make a POST request to Spotify's token endpoint
-    console.log("Received authorization code:", code);
+    if (!tokenResponse.ok) {
+      console.error("Token exchange failed:", await tokenResponse.text());
+      return NextResponse.redirect(
+        new URL("/login?error=token_exchange_failed", request.url)
+      );
+    }
 
-    // Redirect to the search page
-    return NextResponse.redirect(new URL("/search", request.url));
+    const tokens = await tokenResponse.json();
+    const { access_token, refresh_token, expires_in } = tokens;
+
+    // Create the response with redirect
+    const response = NextResponse.redirect(new URL("/search", request.url));
+
+    // Set cookies in the response
+    response.cookies.set("spotify_access_token", access_token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      maxAge: expires_in,
+    });
+
+    response.cookies.set("spotify_refresh_token", refresh_token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      maxAge: 30 * 24 * 60 * 60, // 30 days
+    });
+
+    return response;
   } catch (error) {
     console.error("Error in Spotify callback:", error);
     return NextResponse.redirect(
