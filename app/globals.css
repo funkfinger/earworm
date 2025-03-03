@@ -1,13 +1,15 @@
 @import "tailwindcss";
 
 @theme {
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-playpen);
 }
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #4e342e;
+  --foreground: #ddd2a7;
+  --highlight: #ef798a;
+  --accent-a: #727d71;
+  --accent-b: #586f7c;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -20,5 +22,79 @@
 body {
   color: var(--foreground);
   background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans), "Playpen Sans", cursive;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Custom squiggly underline */
+.squiggly-underline {
+  position: relative;
+  text-decoration: none;
+}
+
+.squiggly-underline::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -5px;
+  height: 4px;
+  background: url("data:image/svg+xml,%3Csvg width='100' height='8' viewBox='0 0 100 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 4C10 0 20 8 30 4C40 0 50 8 60 4C70 0 80 8 90 4C100 0 110 8 120 4' stroke='%23ef798a' stroke-width='3'/%3E%3C/svg%3E");
+  background-position: bottom;
+  background-repeat: repeat-x;
+  background-size: 20% 100%;
+}
+
+/* Hand-drawn border */
+.hand-drawn-border {
+  position: relative;
+  border-radius: 8px;
+}
+
+.hand-drawn-border::before {
+  content: "";
+  position: absolute;
+  top: -4px;
+  left: -4px;
+  right: -4px;
+  bottom: -4px;
+  border: 2px solid var(--highlight);
+  border-radius: 12px;
+  clip-path: polygon(
+    0% 5%,
+    5% 0%,
+    95% 0%,
+    100% 5%,
+    100% 95%,
+    95% 100%,
+    5% 100%,
+    0% 95%,
+    0% 5%
+  );
+}
+
+/* Bounce and settle animation utility class */
+.bounce-settle {
+  animation: bounce-settle 0.5s ease-in-out forwards;
+}
+
+@keyframes bounce-settle {
+  0% {
+    transform: scale(0.8);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 0.7;
+  }
+  70% {
+    transform: scale(0.95);
+    opacity: 0.9;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
