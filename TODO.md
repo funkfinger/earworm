@@ -128,15 +128,15 @@
   - [ ] Add loading animations
   - [ ] Transition effects
 
-- [ ] Welcome Screen
+- [x] Welcome Screen
 
-  - [ ] Introduction to QT mascot
-  - [ ] App purpose explanation
-  - [ ] Get started button
+  - [x] Introduction to QT mascot
+  - [x] App purpose explanation
+  - [x] Get started button
 
 - [ ] Spotify Login Screen
 
-  - [ ] Login button
+  - [x] Login button
   - [ ] Authentication status indicators
   - [ ] Error handling UI
 

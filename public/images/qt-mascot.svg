@@ -1,0 +1,32 @@
+<svg width="300" height="300" viewBox="0 0 300 300" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Body of the worm (pink) -->
+  <path d="M150 250C190 250 220 220 220 180C220 140 190 110 150 110C110 110 80 140 80 180C80 220 110 250 150 250Z" fill="#ef798a" stroke="#333" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+  
+  <!-- Tail/body extension -->
+  <path d="M80 180C80 180 60 190 50 210C40 230 50 260 80 270C110 280 130 260 130 260" fill="#ef798a" stroke="#333" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+  
+  <!-- Head/upper body -->
+  <path d="M150 110C150 110 160 80 150 60C140 40 110 30 90 50C70 70 90 100 90 100" fill="#ef798a" stroke="#333" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+  
+  <!-- Eyes (white with black pupils) -->
+  <circle cx="130" cy="160" r="15" fill="white" stroke="#333" stroke-width="2"/>
+  <circle cx="170" cy="160" r="15" fill="white" stroke="#333" stroke-width="2"/>
+  <circle cx="130" cy="160" r="7" fill="#333"/>
+  <circle cx="170" cy="160" r="7" fill="#333"/>
+  
+  <!-- Smile -->
+  <path d="M130 200C130 200 140 215 170 200" stroke="#333" stroke-width="4" stroke-linecap="round"/>
+  
+  <!-- Blush spots -->
+  <circle cx="115" cy="185" r="8" fill="#ff9eb1" opacity="0.7"/>
+  <circle cx="185" cy="185" r="8" fill="#ff9eb1" opacity="0.7"/>
+  
+  <!-- Headphones -->
+  <path d="M100 130C100 130 80 120 70 140C60 160 80 170 80 170" stroke="#ddd2a7" stroke-width="4" stroke-linecap="round"/>
+  <path d="M200 130C200 130 220 120 230 140C240 160 220 170 220 170" stroke="#ddd2a7" stroke-width="4" stroke-linecap="round"/>
+  <path d="M70 140C70 140 90 110 150 110C210 110 230 140 230 140" stroke="#ddd2a7" stroke-width="4" stroke-linecap="round"/>
+  
+  <!-- Music notes -->
+  <path d="M240 120L250 110C250 110 260 120 255 130C250 140 240 135 240 125C240 115 250 110 250 110" fill="#ddd2a7" stroke="#333" stroke-width="2"/>
+  <path d="M260 140L270 130C270 130 280 140 275 150C270 160 260 155 260 145C260 135 270 130 270 130" fill="#ddd2a7" stroke="#333" stroke-width="2"/>
+</svg> 
