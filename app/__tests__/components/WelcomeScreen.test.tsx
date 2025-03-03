@@ -3,6 +3,11 @@ import { render, screen, fireEvent } from "@testing-library/react";
 import "@testing-library/jest-dom";
 import WelcomeScreen from "../../components/WelcomeScreen";
 import { useRouter } from "next/navigation";
+import {
+  expectColorScheme,
+  expectHighlightColor,
+  expectAccentColor,
+} from "../utils/styleTestUtils";
 
 // Mock the Next.js router
 jest.mock("next/navigation", () => ({
@@ -25,9 +30,19 @@ type ImageProps = {
 jest.mock("next/image", () => ({
   __esModule: true,
   default: (props: ImageProps) => {
+    const { fill, priority, ...rest } = props;
     // eslint-disable-next-line @next/next/no-img-element
-    return <img {...props} src={props.src || ""} />;
+    return (
+      <img {...rest} style={{ position: fill ? "absolute" : "relative" }} />
+    );
   },
+}));
+
+// Mock the Playpen Sans font
+jest.mock("next/font/google", () => ({
+  Playpen_Sans: () => ({
+    className: "font-playpen",
+  }),
 }));
 
 describe("WelcomeScreen", () => {
@@ -44,24 +59,30 @@ describe("WelcomeScreen", () => {
     jest.clearAllMocks();
   });
 
-  it("renders the welcome screen with QT mascot", () => {
+  it("renders the welcome screen with worm mascot", () => {
     render(<WelcomeScreen />);
 
     // Check for the heading
     expect(screen.getByText("Welcome to De Worm!")).toBeInTheDocument();
 
-    // Check for QT mascot image
-    expect(screen.getByAltText("QT Mascot")).toBeInTheDocument();
+    // Check for worm mascot image
+    expect(screen.getByAltText("Worm Mascot")).toBeInTheDocument();
 
     // Check for welcome text - using more specific selectors to handle apostrophes
     expect(
-      screen.getByText((content) => content.includes("Hi there!"))
+      screen.getByText((content: string) => content.includes("Hi there!"))
     ).toBeInTheDocument();
+
+    // Check for the highlighted "Worm" text in the introduction
+    const introText = screen.getByText((content: string) =>
+      content.includes("Hi there!")
+    );
+    expect(introText).toContainHTML(
+      '<span class="text-secondary font-bold">Worm</span>'
+    );
+
     expect(
-      screen.getByText((content) => content.includes("QT"))
-    ).toBeInTheDocument();
-    expect(
-      screen.getByText((content) =>
+      screen.getByText((content: string) =>
         content.includes("Got a song stuck in your head")
       )
     ).toBeInTheDocument();
@@ -71,12 +92,58 @@ describe("WelcomeScreen", () => {
     render(<WelcomeScreen />);
 
     // Find and click the button
-    const button = screen.getByText((content) =>
+    const button = screen.getByText((content: string) =>
       content.includes("Get Started")
     );
     fireEvent.click(button);
 
     // Check if router.push was called with the correct path
     expect(mockPush).toHaveBeenCalledWith("/login");
+  });
+
+  it("applies the correct color scheme and font styles", () => {
+    render(<WelcomeScreen />);
+
+    // Check main container styles
+    const mainContainer = screen.getByRole("main");
+    expectColorScheme(mainContainer);
+
+    // Check heading styles
+    const heading = screen.getByText("Welcome to De Worm!");
+    expect(heading).toHaveClass("text-primary-foreground");
+    expect(heading).toHaveClass("font-playpen");
+
+    // Check highlight text styles
+    const highlightText = screen.getByText("Worm");
+    expectHighlightColor(highlightText);
+
+    // Check accent text styles
+    const accentText = screen.getByText((content: string) =>
+      content.includes("Got a song stuck in your head")
+    );
+    expectAccentColor(accentText);
+
+    // Check card styles
+    const card = screen
+      .getByText((content: string) =>
+        content.includes("We'll need to connect to your Spotify account")
+      )
+      .closest(".bg-accent-b\\/30");
+    expect(card).toHaveClass("bg-accent-b/30");
+    expect(card).toHaveClass("border-secondary/20");
+
+    // Check card content styles
+    const cardContent = screen.getByText((content: string) =>
+      content.includes("We'll need to connect to your Spotify account")
+    );
+    expect(cardContent).toHaveClass("text-primary-foreground");
+    expect(cardContent).toHaveClass("font-playpen");
+
+    // Check button styles
+    const button = screen.getByText("Let's Get Started!");
+    expect(button).toHaveClass("bg-secondary");
+    expect(button).toHaveClass("hover:bg-secondary-hover");
+    expect(button).toHaveClass("text-primary");
+    expect(button).toHaveClass("font-playpen");
   });
 });

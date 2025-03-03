@@ -10,37 +10,52 @@ jest.mock("next/image", () => ({
     src,
     alt,
     fill,
-    priority,
     ...props
   }: {
     src: string;
     alt: string;
     fill?: boolean;
-    priority?: boolean;
+    style?: React.CSSProperties;
   }) => (
     <img
       src={src}
       alt={alt}
       {...props}
-      style={{ ...props.style, position: fill ? "absolute" : "relative" }}
+      style={{
+        ...(props.style || {}),
+        position: fill ? "absolute" : "relative",
+      }}
     />
   ),
 }));
 
 describe("SpotifyLogin", () => {
-  const mockLocation = {
+  interface MockLocation {
+    href: string;
+    assign: jest.Mock;
+  }
+
+  const mockLocation: MockLocation = {
     href: "http://localhost/",
     assign: jest.fn(),
   };
 
   beforeEach(() => {
     // Reset window.location mock before each test
-    delete (window as any).location;
-    window.location = mockLocation as any;
+    delete (window as { location?: Location }).location;
+    window.location = mockLocation as unknown as Location;
   });
 
   it("renders the Spotify login button with logo", () => {
     render(<SpotifyLogin />);
+
+    // Check for the heading
+    expect(screen.getByText("Connect to Spotify")).toBeInTheDocument();
+
+    // Check for the description
+    expect(
+      screen.getByText("Link your Spotify account to get started")
+    ).toBeInTheDocument();
 
     // Check for the Spotify logo
     expect(screen.getByAltText("Spotify Logo")).toBeInTheDocument();
@@ -48,20 +63,22 @@ describe("SpotifyLogin", () => {
     // Check for the connect button
     expect(screen.getByText("Connect with Spotify")).toBeInTheDocument();
 
-    // Check for the terms text
+    // Check for the terms text (using a more flexible matcher)
     expect(
-      screen.getByText(/By connecting, you agree to our Terms/)
+      screen.getByText((content) =>
+        content.includes("By connecting, you agree to our")
+      )
     ).toBeInTheDocument();
   });
 
-  it("redirects to Spotify auth endpoint when button is clicked", () => {
+  it("navigates to Spotify auth when connect button is clicked", () => {
     render(<SpotifyLogin />);
 
     // Find and click the connect button
-    const connectButton = screen.getByText("Connect with Spotify");
-    fireEvent.click(connectButton);
+    const button = screen.getByText("Connect with Spotify");
+    fireEvent.click(button);
 
-    // Check if we're redirected to the Spotify auth endpoint
+    // Check if window.location.assign was called with the correct URL
     expect(window.location.assign).toHaveBeenCalledWith("/api/auth/spotify");
   });
 
