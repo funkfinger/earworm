@@ -41,18 +41,18 @@ describe("SearchPage", () => {
     render(<SearchPage />);
 
     // Check for the heading
-    expect(screen.getByText("Search for Your Earworm")).toBeInTheDocument();
+    expect(screen.getByText("What's stuck in your head?")).toBeInTheDocument();
 
     // Check for the worm mascot
     expect(screen.getByAltText("Worm Mascot")).toBeInTheDocument();
 
     // Check for the search input
     expect(
-      screen.getByPlaceholderText("Enter song name, artist, or lyrics...")
+      screen.getByPlaceholderText("Search for a song or artist...")
     ).toBeInTheDocument();
 
     // Check for the search button
-    expect(screen.getByText("Search")).toBeInTheDocument();
+    expect(screen.getByText("Find My Earworm")).toBeInTheDocument();
 
     // Check for the placeholder card
     expect(
@@ -66,9 +66,9 @@ describe("SearchPage", () => {
 
     // Get the search input and button
     const searchInput = screen.getByPlaceholderText(
-      "Enter song name, artist, or lyrics..."
+      "Search for a song or artist..."
     );
-    const searchButton = screen.getByText("Search");
+    const searchButton = screen.getByText("Find My Earworm");
 
     // Type in the search input
     fireEvent.change(searchInput, { target: { value: "test song" } });
@@ -92,7 +92,7 @@ describe("SearchPage", () => {
     expectColorScheme(mainContainer);
 
     // Check heading styles
-    const heading = screen.getByText("Search for Your Earworm");
+    const heading = screen.getByText("What's stuck in your head?");
     expect(heading).toHaveClass("text-primary-foreground");
     expect(heading).toHaveClass("font-playpen");
 
@@ -104,7 +104,7 @@ describe("SearchPage", () => {
 
     // Check search input styles
     const searchInput = screen.getByPlaceholderText(
-      "Enter song name, artist, or lyrics..."
+      "Search for a song or artist..."
     );
     expect(searchInput).toHaveClass("bg-accent-b/30");
     expect(searchInput).toHaveClass("border-secondary/20");
@@ -113,7 +113,7 @@ describe("SearchPage", () => {
     expect(searchInput).toHaveClass("font-playpen");
 
     // Check search button styles
-    const searchButton = screen.getByText("Search");
+    const searchButton = screen.getByText("Find My Earworm");
     expect(searchButton).toHaveClass("bg-secondary");
     expect(searchButton).toHaveClass("hover:bg-secondary-hover");
     expect(searchButton).toHaveClass("text-primary");

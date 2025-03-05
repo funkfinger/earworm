@@ -84,17 +84,17 @@ describe("Complete User Flow", () => {
     render(<SearchPage />);
 
     // Verify search page content
-    expect(screen.getByText("Search for Your Earworm")).toBeInTheDocument();
+    expect(screen.getByText("What's stuck in your head?")).toBeInTheDocument();
     expect(
-      screen.getByPlaceholderText("Enter song name, artist, or lyrics...")
+      screen.getByPlaceholderText("Search for a song or artist...")
     ).toBeInTheDocument();
-    expect(screen.getByText("Search")).toBeInTheDocument();
+    expect(screen.getByText("Find My Earworm")).toBeInTheDocument();
 
     // Test search functionality
     const searchInput = screen.getByPlaceholderText(
-      "Enter song name, artist, or lyrics..."
+      "Search for a song or artist..."
     );
-    const searchButton = screen.getByText("Search");
+    const searchButton = screen.getByText("Find My Earworm");
 
     fireEvent.change(searchInput, { target: { value: "test song" } });
     expect(searchInput).toHaveValue("test song");

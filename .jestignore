@@ -1,0 +1,4 @@
+src/app/__tests__/mocks/
+app/__tests__/utils/
+app/__tests__/setup.ts
+tests-examples/ 

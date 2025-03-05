@@ -1,20 +1,47 @@
 // Learn more: https://github.com/testing-library/jest-dom
 import "@testing-library/jest-dom";
 
-// Mock next/navigation
+// Mock the next/router
 jest.mock("next/navigation", () => ({
   useRouter: () => ({
     push: jest.fn(),
     replace: jest.fn(),
     prefetch: jest.fn(),
     back: jest.fn(),
-    forward: jest.fn(),
-    refresh: jest.fn(),
-    pathname: "/",
-    query: {},
   }),
-  usePathname: () => "/",
-  useSearchParams: () => new URLSearchParams(),
+  useSearchParams: () => ({
+    get: jest.fn(),
+  }),
+}));
+
+// Mock the Amplify client
+jest.mock("@/utils/amplifyClient", () => ({
+  client: {
+    models: {
+      User: {
+        create: jest.fn(),
+        get: jest.fn(),
+        list: jest.fn(),
+        delete: jest.fn(),
+        update: jest.fn(),
+      },
+      Earworm: {
+        create: jest.fn(),
+        get: jest.fn(),
+        list: jest.fn(),
+        delete: jest.fn(),
+        update: jest.fn(),
+      },
+    },
+  },
+}));
+
+// Mock the Amplify auth
+jest.mock("aws-amplify/auth", () => ({
+  signIn: jest.fn(),
+  signUp: jest.fn(),
+  confirmSignUp: jest.fn(),
+  getCurrentUser: jest.fn(),
 }));
 
 // Mock next/image

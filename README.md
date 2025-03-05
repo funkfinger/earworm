@@ -56,23 +56,25 @@ This project uses Jest for unit tests and Playwright for E2E tests, following te
 
 ```bash
 # Run unit tests
-npm test
+npm test -- --config=jest.config.js
 
 # Run unit tests in watch mode
-npm run test:watch
+npm test -- --config=jest.config.js --watch
 
 # Run end-to-end tests
-npm run test:e2e
+npx playwright test
 
-# Run CI/CD pipeline locally
-./scripts/ci-test.sh
+# Run all tests (unit and E2E)
+./scripts/run-tests.sh
 ```
 
 ### Test Structure
 
-- Unit tests are located alongside components in `__tests__` directories
-- E2E tests are located in the `e2e/tests` directory
-- Mock services for testing are in `app/__tests__/mocks`
+- Unit tests are located in `src/app/__tests__/` directory
+- E2E tests are located in the `e2e/tests/` directory
+- Mock services for testing are in `src/app/__tests__/mocks/`
+
+For detailed information about the testing approach, see [TESTING.md](TESTING.md).
 
 ## CI/CD
 
@@ -150,8 +152,9 @@ NOTE: The app should not use the **deprecated** Spotify preview functionality - 
 
 #### Deployment
 
-- Amazon AWS Amplify
-- Amazon DynamoDB
+- Hosting: Amazon AWS Amplify Gen 2
+- Database: Amazon DynamoDB
+- Domain Name: deworm.us
 
 ### Users & Data
 

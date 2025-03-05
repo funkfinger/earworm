@@ -27,7 +27,7 @@ const WelcomeScreen: React.FC = () => {
             alt="Worm Mascot"
             fill
             className="object-contain"
-            priority="true"
+            priority={true}
           />
         </div>
 
@@ -44,8 +44,8 @@ const WelcomeScreen: React.FC = () => {
           </p>
 
           <p className="mt-2 text-accent-a font-playpen">
-            Got a song stuck in your head that just won&apos;t go away? I&apos;m
-            here to help you replace it with something even catchier!
+            Got a song stuck in your head? I&apos;m here to help you replace it
+            with something even catchier!
           </p>
 
           <Card className="mt-6 bg-accent-b/30 border-secondary/20">

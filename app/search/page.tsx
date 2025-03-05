@@ -23,7 +23,7 @@ export default function SearchPage() {
       <div className="max-w-md w-full space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-1000">
         <div className="text-center">
           <h1 className="text-4xl font-bold text-primary-foreground squiggly-underline inline-block font-playpen">
-            Search for Your Earworm
+            What&apos;s stuck in your head?
           </h1>
 
           <div className="relative w-32 h-32 mx-auto my-6 animate-in zoom-in duration-1000">
@@ -43,7 +43,7 @@ export default function SearchPage() {
           <form onSubmit={handleSearch} className="mt-8 space-y-4">
             <Input
               type="text"
-              placeholder="Enter song name, artist, or lyrics..."
+              placeholder="Search for a song or artist..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full bg-accent-b/30 border-secondary/20 text-primary-foreground placeholder:text-accent-a font-playpen"
@@ -53,7 +53,7 @@ export default function SearchPage() {
               size="lg"
               className="w-full bg-secondary hover:bg-secondary-hover text-primary font-playpen"
             >
-              Search
+              Find My Earworm
             </Button>
           </form>
 
