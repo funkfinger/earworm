@@ -11,7 +11,7 @@ const customJestConfig = {
   testEnvironment: "jest-environment-jsdom",
   moduleNameMapper: {
     // Handle module aliases (if you have them configured in tsconfig.json)
-    "^@/(.*)$": "<rootDir>/$1",
+    "^@/(.*)$": "<rootDir>/src/$1",
   },
   testMatch: [
     "**/__tests__/**/*.test.[jt]s?(x)",
