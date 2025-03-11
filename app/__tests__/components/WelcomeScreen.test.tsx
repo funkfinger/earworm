@@ -30,7 +30,7 @@ type ImageProps = {
 jest.mock("next/image", () => ({
   __esModule: true,
   default: (props: ImageProps) => {
-    const { fill, priority, ...rest } = props;
+    const { fill, ...rest } = props;
     // eslint-disable-next-line @next/next/no-img-element
     return (
       <img {...rest} style={{ position: fill ? "absolute" : "relative" }} />
@@ -59,33 +59,17 @@ describe("WelcomeScreen", () => {
     jest.clearAllMocks();
   });
 
-  it("renders the welcome screen with worm mascot", () => {
+  it("renders the welcome screen with QT mascot", () => {
     render(<WelcomeScreen />);
 
-    // Check for the heading
-    expect(screen.getByText("Welcome to De Worm!")).toBeInTheDocument();
+    // Check for app name
+    expect(screen.getByText("De Worm")).toBeInTheDocument();
 
-    // Check for worm mascot image
-    expect(screen.getByAltText("Worm Mascot")).toBeInTheDocument();
+    // Check for QT mascot image
+    expect(screen.getByAltText("QT Mascot")).toBeInTheDocument();
 
-    // Check for welcome text - using more specific selectors to handle apostrophes
-    expect(
-      screen.getByText((content: string) => content.includes("Hi there!"))
-    ).toBeInTheDocument();
-
-    // Check for the highlighted "Worm" text in the introduction
-    const introText = screen.getByText((content: string) =>
-      content.includes("Hi there!")
-    );
-    expect(introText).toContainHTML(
-      '<span class="text-secondary font-bold">Worm</span>'
-    );
-
-    expect(
-      screen.getByText((content: string) =>
-        content.includes("Got a song stuck in your head")
-      )
-    ).toBeInTheDocument();
+    // Check for tagline
+    expect(screen.getByText("Your Earworm Cure")).toBeInTheDocument();
   });
 
   it("navigates to login page when button is clicked", () => {
@@ -114,7 +98,7 @@ describe("WelcomeScreen", () => {
     expect(heading).toHaveClass("font-playpen");
 
     // Check highlight text styles
-    const highlightText = screen.getByText("Worm");
+    const highlightText = screen.getByText("QT");
     expectHighlightColor(highlightText);
 
     // Check accent text styles

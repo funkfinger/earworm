@@ -10,11 +10,13 @@ test.describe("Welcome Screen Flow", () => {
     // Check that we're on the welcome screen
     await expect(page.getByText("Welcome to De Worm!")).toBeVisible();
 
-    // Check for Worm mascot
-    await expect(page.getByAltText("Worm Mascot")).toBeVisible();
+    // Check for QT mascot
+    await expect(page.getByAltText("QT Mascot")).toBeVisible();
+
+    // Check for introduction text
+    await expect(page.getByText(/Hi! I'm QT!/)).toBeVisible();
 
     // Check for welcome text
-    await expect(page.getByText(/Hi there! I'm Worm/)).toBeVisible();
     await expect(page.getByText(/Got a song stuck in your head/)).toBeVisible();
 
     // Click the get started button

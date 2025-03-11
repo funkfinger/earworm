@@ -43,13 +43,11 @@ describe("SearchPage", () => {
     // Check for the heading
     expect(screen.getByText("What's stuck in your head?")).toBeInTheDocument();
 
-    // Check for the worm mascot
-    expect(screen.getByAltText("Worm Mascot")).toBeInTheDocument();
+    // Check for the QT mascot
+    expect(screen.getByAltText("QT Mascot")).toBeInTheDocument();
 
     // Check for the search input
-    expect(
-      screen.getByPlaceholderText("Search for a song or artist...")
-    ).toBeInTheDocument();
+    expect(screen.getByPlaceholderText(/Search.../i)).toBeInTheDocument();
 
     // Check for the search button
     expect(screen.getByText("Find My Earworm")).toBeInTheDocument();

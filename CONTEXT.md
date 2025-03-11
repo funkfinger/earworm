@@ -45,6 +45,25 @@ Follow these rules when you write code:
 
 This is a Next.js application that helps users cure earworms (songs stuck in their head) by playing replacement songs. The app integrates with Spotify for authentication and playback.
 
+#### Project Structure
+
+The application follows a clear separation of concerns with the following directory structure:
+
+- `/app`: Contains Next.js app router pages and app-specific components
+
+  - `/components`: App-specific components like WelcomeScreen, SpotifyLogin
+  - `/api`: API routes for authentication and Spotify integration
+  - `/search`, `/login`, etc.: Page components
+
+- `/components`: Shared components and UI library
+
+  - `/ui`: Reusable UI components (button, card, dialog, etc.)
+    - Built with Radix UI primitives
+    - Follows shadcn/ui patterns
+    - Fully typed with TypeScript
+
+- `/lib`: Shared utilities and helper functions
+
 #### Testing Infrastructure
 
 - **Unit Tests**: Using Jest for component and integration testing

@@ -20,14 +20,15 @@ const WelcomeScreen: React.FC = () => {
       role="main"
     >
       <div className="max-w-md w-full space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-1000">
-        {/* Worm Mascot */}
-        <div className="relative w-48 h-48 mx-auto animate-in zoom-in duration-1000">
+        {/* QT Mascot */}
+        <div className="my-4">
           <Image
-            src="/images/worm.svg"
-            alt="Worm Mascot"
-            fill
-            className="object-contain"
-            priority={true}
+            src="/mascot.svg"
+            alt="QT Mascot"
+            width={200}
+            height={200}
+            className="mx-auto"
+            priority
           />
         </div>
 
@@ -39,8 +40,8 @@ const WelcomeScreen: React.FC = () => {
 
           <p className="text-xl mt-4 text-primary-foreground font-playpen">
             Hi there! I&apos;m{" "}
-            <span className="text-secondary font-bold">Worm</span>, your
-            friendly earworm expert!
+            <span className="text-secondary font-bold">QT</span>, your friendly
+            earworm expert!
           </p>
 
           <p className="mt-2 text-accent-a font-playpen">
