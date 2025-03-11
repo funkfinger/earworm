@@ -4,7 +4,6 @@ import React from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 
 const WelcomeScreen: React.FC = () => {
   const router = useRouter();
@@ -49,15 +48,15 @@ const WelcomeScreen: React.FC = () => {
             with something even catchier!
           </p>
 
-          <Card className="mt-6 bg-accent-b/30 border-secondary/20">
-            <CardContent className="p-4">
+          <div className="handdrawn-card mt-6 bg-accent-b/30 text-secondary">
+            <div className="p-4">
               <p className="text-sm text-primary-foreground font-playpen">
                 We&apos;ll need to connect to your Spotify account to find the
                 perfect replacement song. Don&apos;t worry, we only use this to
                 play music for you!
               </p>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         </div>
 
         {/* Get Started Button */}

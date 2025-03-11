@@ -70,33 +70,39 @@ export function SearchCombobox({
           aria-expanded={open}
           className={cn(
             "w-full justify-between rounded-lg border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
+            "handdrawn-button handdrawn-border",
             className
           )}
         >
           {value || placeholder}
         </button>
       </PopoverTrigger>
-      <PopoverContent className="w-[300px] p-0">
+      <PopoverContent className={cn("w-[300px] p-0", "handdrawn-card")}>
         <Command>
           <div className="flex items-center border-b px-3">
             <input
               data-testid="search-combobox-input"
               value={query}
               onChange={(e) => handleSearch(e.target.value)}
-              className="flex h-10 w-full rounded-md bg-transparent py-3 text-sm outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50"
+              className={cn(
+                "flex h-10 w-full rounded-md bg-transparent py-3 text-sm outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50",
+                "handdrawn-input"
+              )}
               placeholder={placeholder}
             />
           </div>
           {loading && (
             <div
               data-testid="search-loading"
-              className="py-6 text-center text-sm"
+              className={cn("py-6 text-center text-sm", "handdrawn-text")}
             >
               Loading...
             </div>
           )}
           {!loading && results.length === 0 && query && (
-            <div className="py-6 text-center text-sm">No results found.</div>
+            <div className={cn("py-6 text-center text-sm", "handdrawn-text")}>
+              No results found.
+            </div>
           )}
           {!loading && results.length > 0 && (
             <CommandList>
@@ -108,7 +114,10 @@ export function SearchCombobox({
                     setOpen(false);
                     onSelect(result);
                   }}
-                  className="flex items-center gap-2 px-2 py-1.5"
+                  className={cn(
+                    "flex items-center gap-2 px-2 py-1.5",
+                    "handdrawn-border"
+                  )}
                 >
                   <img
                     src={result.albumArt}
@@ -116,8 +125,17 @@ export function SearchCombobox({
                     className="h-8 w-8 rounded-sm object-cover"
                   />
                   <div className="flex flex-col">
-                    <span className="text-sm font-medium">{result.title}</span>
-                    <span className="text-xs text-muted-foreground">
+                    <span
+                      className={cn("text-sm font-medium", "handdrawn-text")}
+                    >
+                      {result.title}
+                    </span>
+                    <span
+                      className={cn(
+                        "text-xs text-muted-foreground",
+                        "handdrawn-text"
+                      )}
+                    >
                       {result.artist}
                     </span>
                   </div>
