@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState, useRef } from "react";
 import { Button } from "@/app/components/ui/button";
+import Script from "next/script";
 
 // Define base types for Spotify Web Playback SDK
 type SpotifyCallback<T> = (data: T) => void;
@@ -60,113 +61,108 @@ interface SpotifyPlayerProps {
 
 // Augment the Window interface
 declare global {
-  // eslint-disable-next-line @typescript-eslint/no-empty-interface
   interface Window {
-    onSpotifyWebPlaybackSDKReady: () => void;
+    onSpotifyWebPlaybackSDKReady?: () => void;
+    Spotify?: SpotifyWebPlaybackSDK;
   }
 }
-
-// Use a type assertion for the SDK
-const getSpotifySDK = (): SpotifyWebPlaybackSDK | undefined => {
-  type WindowWithSpotify = Window & {
-    Spotify?: SpotifyWebPlaybackSDK;
-  };
-  return (window as WindowWithSpotify).Spotify;
-};
 
 const SpotifyPlayer: React.FC<SpotifyPlayerProps> = ({ trackUri }) => {
   const [player, setPlayer] = useState<SpotifyPlayer | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isSDKReady, setIsSDKReady] = useState(false);
   const playerRef = useRef<SpotifyPlayer | null>(null);
 
-  useEffect(() => {
-    const script = document.createElement("script");
-    script.src = "https://sdk.scdn.co/spotify-player.js";
-    script.async = true;
-    document.body.appendChild(script);
+  const initializePlayer = async () => {
+    try {
+      if (!window.Spotify) {
+        throw new Error("Spotify SDK not loaded");
+      }
 
-    window.onSpotifyWebPlaybackSDKReady = async () => {
-      try {
-        const sdk = getSpotifySDK();
-        if (!sdk) {
-          throw new Error("Spotify SDK not loaded");
-        }
-
-        const spotifyPlayer = new sdk.Player({
-          name: "De Worm Player",
-          getOAuthToken: async (cb: (token: string) => void) => {
+      const spotifyPlayer = new window.Spotify.Player({
+        name: "Earworm Player",
+        getOAuthToken: async (cb: (token: string) => void) => {
+          try {
             const response = await fetch("/api/auth/token");
+            if (!response.ok) {
+              throw new Error("Failed to get access token");
+            }
             const { access_token } = await response.json();
             cb(access_token);
-          },
-          volume: 0.5,
-        }) as SpotifyPlayer;
-
-        playerRef.current = spotifyPlayer;
-
-        spotifyPlayer.addListener<ErrorEvent>(
-          "initialization_error",
-          ({ message }) => {
-            setError(`Failed to initialize: ${message}`);
+          } catch (error) {
+            setError(
+              "Failed to get access token. Please try logging in again."
+            );
           }
-        );
+        },
+        volume: 0.5,
+      }) as SpotifyPlayer;
 
-        spotifyPlayer.addListener<ErrorEvent>(
-          "authentication_error",
-          ({ message }) => {
-            setError(`Failed to authenticate: ${message}`);
-          }
-        );
+      playerRef.current = spotifyPlayer;
 
-        spotifyPlayer.addListener<ErrorEvent>(
-          "account_error",
-          ({ message }) => {
-            setError(`Failed to validate Spotify account: ${message}`);
-          }
-        );
+      spotifyPlayer.addListener<ErrorEvent>(
+        "initialization_error",
+        ({ message }) => {
+          setError(`Failed to initialize: ${message}`);
+        }
+      );
 
-        spotifyPlayer.addListener<ErrorEvent>(
-          "playback_error",
-          ({ message }) => {
-            setError(`Failed to perform playback: ${message}`);
-          }
-        );
+      spotifyPlayer.addListener<ErrorEvent>(
+        "authentication_error",
+        ({ message }) => {
+          setError(`Failed to authenticate: ${message}`);
+        }
+      );
 
-        spotifyPlayer.addListener<PlayerState>(
-          "player_state_changed",
-          (state) => {
-            if (state) {
-              setIsPlaying(!state.paused);
-              if (state.track_window.current_track.uri !== trackUri) {
-                setIsPlaying(false);
-              }
+      spotifyPlayer.addListener<ErrorEvent>("account_error", ({ message }) => {
+        setError(`Failed to validate Spotify account: ${message}`);
+      });
+
+      spotifyPlayer.addListener<ErrorEvent>("playback_error", ({ message }) => {
+        setError(`Failed to perform playback: ${message}`);
+      });
+
+      spotifyPlayer.addListener<PlayerState>(
+        "player_state_changed",
+        (state) => {
+          if (state) {
+            setIsPlaying(!state.paused);
+            if (state.track_window.current_track.uri !== trackUri) {
+              setIsPlaying(false);
             }
           }
-        );
+        }
+      );
 
-        spotifyPlayer.addListener<ReadyEvent>("ready", ({ device_id }) => {
-          console.log("Ready with Device ID", device_id);
-          setPlayer(spotifyPlayer);
-        });
+      spotifyPlayer.addListener<ReadyEvent>("ready", ({ device_id }) => {
+        console.log("Ready with Device ID", device_id);
+        setPlayer(spotifyPlayer);
+      });
 
-        spotifyPlayer.addListener<ReadyEvent>("not_ready", ({ device_id }) => {
-          console.log("Device ID has gone offline", device_id);
-        });
+      spotifyPlayer.addListener<ReadyEvent>("not_ready", ({ device_id }) => {
+        console.log("Device ID has gone offline", device_id);
+      });
 
-        await spotifyPlayer.connect();
-      } catch (error) {
-        setError(`Failed to initialize player: ${error}`);
+      const connected = await spotifyPlayer.connect();
+      if (!connected) {
+        throw new Error("Failed to connect to Spotify");
       }
-    };
+    } catch (error) {
+      setError(`Failed to initialize player: ${error}`);
+    }
+  };
 
+  useEffect(() => {
+    if (isSDKReady) {
+      initializePlayer();
+    }
     return () => {
-      document.body.removeChild(script);
       if (playerRef.current) {
         playerRef.current.disconnect();
       }
     };
-  }, [trackUri]);
+  }, [isSDKReady]);
 
   useEffect(() => {
     if (player?.play && trackUri) {
@@ -194,6 +190,10 @@ const SpotifyPlayer: React.FC<SpotifyPlayerProps> = ({ trackUri }) => {
     }
   };
 
+  const handleSDKLoad = () => {
+    setIsSDKReady(true);
+  };
+
   if (error) {
     return (
       <div className="text-red-500 p-4 rounded-lg bg-red-100">
@@ -203,14 +203,22 @@ const SpotifyPlayer: React.FC<SpotifyPlayerProps> = ({ trackUri }) => {
   }
 
   return (
-    <div className="flex flex-col items-center space-y-4">
-      <Button
-        onClick={handlePlayPause}
-        className="bg-secondary hover:bg-secondary-hover text-primary font-playpen"
-      >
-        {isPlaying ? "Pause" : "Play"}
-      </Button>
-    </div>
+    <>
+      <Script
+        src="https://sdk.scdn.co/spotify-player.js"
+        strategy="afterInteractive"
+        onLoad={handleSDKLoad}
+      />
+      <div className="flex flex-col items-center space-y-4">
+        <Button
+          onClick={handlePlayPause}
+          className="bg-secondary hover:bg-secondary-hover text-primary font-playpen"
+          disabled={!player}
+        >
+          {isPlaying ? "Pause" : "Play"}
+        </Button>
+      </div>
+    </>
   );
 };
 

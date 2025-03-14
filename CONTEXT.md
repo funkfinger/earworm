@@ -45,22 +45,34 @@ Follow these rules when you write code:
 
 This is a Next.js application that helps users cure earworms (songs stuck in their head) by playing replacement songs. The app integrates with Spotify for authentication and playback.
 
+#### Cookie Handling in Next.js 14
+
+Next.js 14 uses an asynchronous cookie API. Key points:
+
+- The `cookies()` function returns a Promise of `ReadonlyRequestCookies`
+- Cookie operations must be handled with `await`:
+  ```typescript
+  const cookieStore = await cookies();
+  const value = cookieStore.get("cookie_name")?.value;
+  ```
+- This affects all server-side cookie operations including:
+  - Reading cookies: `await cookies()`
+  - Setting cookies: `(await cookies()).set()`
+  - Getting specific cookies: `(await cookies()).get()`
+
 #### Project Structure
 
 The application follows a clear separation of concerns with the following directory structure:
 
-- `/app`: Contains Next.js app router pages and app-specific components
+- `/app`: Contains all application code including pages, components, and API routes
 
-  - `/components`: App-specific components like WelcomeScreen, SpotifyLogin
+  - `/components`: All React components
+    - `/ui`: Reusable UI components (button, card, dialog, etc.)
+      - Built with Radix UI primitives
+      - Follows shadcn/ui patterns
+      - Fully typed with TypeScript
   - `/api`: API routes for authentication and Spotify integration
   - `/search`, `/login`, etc.: Page components
-
-- `/components`: Shared components and UI library
-
-  - `/ui`: Reusable UI components (button, card, dialog, etc.)
-    - Built with Radix UI primitives
-    - Follows shadcn/ui patterns
-    - Fully typed with TypeScript
 
 - `/lib`: Shared utilities and helper functions
 

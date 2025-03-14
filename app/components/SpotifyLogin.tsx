@@ -1,17 +1,39 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Image from "next/image";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Button } from "@/app/components/ui/button";
+import { Card, CardContent } from "@/app/components/ui/card";
 
 const SpotifyLogin: React.FC = () => {
-  const handleLogin = () => {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const errorParam = searchParams.get("error");
+    if (errorParam) {
+      switch (errorParam) {
+        case "missing_credentials":
+          setError("Server configuration error. Please try again later.");
+          break;
+        case "auth_error":
+          setError("Failed to connect to Spotify. Please try again.");
+          break;
+        default:
+          setError("An error occurred. Please try again.");
+      }
+    }
+  }, [searchParams]);
+
+  const handleLogin = async () => {
     try {
-      // Redirect to our API endpoint that will handle Spotify OAuth
-      window.location.assign("/api/auth/spotify");
+      // Use router.push for client-side navigation
+      router.push("/api/auth/spotify");
     } catch (error) {
       console.error("Failed to initiate Spotify login:", error);
+      setError("Failed to connect to Spotify. Please try again.");
     }
   };
 
@@ -25,6 +47,9 @@ const SpotifyLogin: React.FC = () => {
           <p className="text-accent-a font-playpen">
             Link your Spotify account to get started
           </p>
+          {error && (
+            <p className="text-red-500 text-sm mt-2 font-playpen">{error}</p>
+          )}
         </div>
 
         <Button

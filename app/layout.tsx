@@ -1,19 +1,14 @@
-import type { Metadata } from "next";
-import { Playpen_Sans } from "next/font/google";
 import "./globals.css";
-import "./styles/handdrawn.css";
-import Script from "next/script";
+import { Playpen_Sans } from "next/font/google";
 
 const playpenSans = Playpen_Sans({
-  variable: "--font-playpen",
   subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700", "800"],
-  display: "swap",
+  variable: "--font-playpen",
 });
 
-export const metadata: Metadata = {
-  title: "De Worm | Earworm Cure App",
-  description: "An app that helps with songs stuck in your head (earworms)",
+export const metadata = {
+  title: "Earworm",
+  description: "Get that song out of your head",
 };
 
 export default function RootLayout({
@@ -23,12 +18,6 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={playpenSans.variable}>
-      <head>
-        <Script
-          src="https://sdk.scdn.co/spotify-player.js"
-          strategy="afterInteractive"
-        />
-      </head>
       <body className="font-sans bg-background text-text antialiased">
         <svg width="0" height="0" style={{ position: "absolute" }}>
           <defs>

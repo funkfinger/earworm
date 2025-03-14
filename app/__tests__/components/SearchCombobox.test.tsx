@@ -1,7 +1,10 @@
 import React from "react";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { SearchCombobox, SearchResult } from "@/components/ui/search-combobox";
+import {
+  SearchCombobox,
+  SearchResult,
+} from "@/app/components/ui/search-combobox";
 
 const mockResults: SearchResult[] = [
   {

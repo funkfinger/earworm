@@ -9,7 +9,7 @@ The opening page features our mascot "QT", a cute pink worm character with a hap
 1. Greet you and sympathize with your earworm problem
 2. Ask you to log into Spotify (Apple Music in future)
 3. Help you find the song that's stuck in your head
-4. Play a replacement song from your streaming service
+4. Play a replacement song from the playlist https://open.spotify.com/playlist/0E9WYGYWZBqfmp6eJ0Nl1t?si=55d3bde342094dc2
 5. Follow up to see if the solution worked
 
 The app keeps a record of users' earworm history and replacement songs, with a database tracking:
@@ -139,6 +139,8 @@ The app will need to address confirmation and error cases with elements such as 
 - highlight color: #ef798a
 - accent color a: #727d71
 - accent color b: #586f7c
+
+All UI elements should have the hand-drawn CSS techniques from http://fxaeberhard.github.io/handdrawn.css/
 
 ### Technology
 

@@ -1,45 +1,48 @@
 import { NextResponse } from "next/server";
+import { generateSpotifyAuthUrl } from "@/app/lib/auth";
 
 // This is a placeholder for the actual Spotify OAuth implementation
 // In a real implementation, you would use the Spotify Web API to generate an authorization URL
 export async function GET() {
+  console.log("[Spotify Route] Starting...");
   try {
-    // In a real implementation, you would:
-    // 1. Generate a random state string for CSRF protection
-    // 2. Store the state in a cookie or session
-    // 3. Construct the Spotify authorization URL with proper scopes
+    console.log("[Spotify Route] Before generating auth URL");
+    let authUrl;
+    try {
+      authUrl = await generateSpotifyAuthUrl();
+      console.log("[Spotify Route] Auth URL generated successfully:", authUrl);
+    } catch (genError) {
+      console.error("[Spotify Route] Error generating auth URL:", genError);
+      throw genError;
+    }
 
-    // For now, we'll use placeholder values
-    const clientId = process.env.SPOTIFY_CLIENT_ID || "YOUR_SPOTIFY_CLIENT_ID";
-    const redirectUri =
-      process.env.SPOTIFY_REDIRECT_URI ||
-      "http://localhost:3000/api/auth/callback";
-    const scopes = [
-      "user-read-private",
-      "user-read-email",
-      "streaming",
-      "user-read-playback-state",
-      "user-modify-playback-state",
-    ].join(" ");
+    console.log("[Spotify Route] Before creating URL object");
+    let spotifyAuthUrl;
+    try {
+      spotifyAuthUrl = new URL(authUrl);
+      console.log(
+        "[Spotify Route] URL object created successfully:",
+        spotifyAuthUrl.toString()
+      );
+    } catch (urlError) {
+      console.error("[Spotify Route] Error creating URL object:", urlError);
+      throw urlError;
+    }
 
-    // Generate a random state string
-    const state = Math.random().toString(36).substring(2, 15);
-
-    // Construct the Spotify authorization URL
-    const spotifyAuthUrl = new URL("https://accounts.spotify.com/authorize");
-    spotifyAuthUrl.searchParams.append("client_id", clientId);
-    spotifyAuthUrl.searchParams.append("response_type", "code");
-    spotifyAuthUrl.searchParams.append("redirect_uri", redirectUri);
-    spotifyAuthUrl.searchParams.append("state", state);
-    spotifyAuthUrl.searchParams.append("scope", scopes);
-
-    // Redirect to Spotify authorization page
-    return NextResponse.redirect(spotifyAuthUrl.toString());
+    console.log("[Spotify Route] Before redirect");
+    const response = NextResponse.redirect(spotifyAuthUrl);
+    console.log("[Spotify Route] Response created successfully");
+    return response;
   } catch (error) {
-    console.error("Error initiating Spotify auth:", error);
-    return NextResponse.json(
-      { error: "Failed to initiate Spotify authentication" },
-      { status: 500 }
-    );
+    console.error("[Spotify Route] Top-level error caught:", {
+      error,
+      type: typeof error,
+      isError: error instanceof Error,
+      message: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined,
+    });
+
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
+    return NextResponse.redirect(new URL("/login?error=auth_error", baseUrl));
   }
 }

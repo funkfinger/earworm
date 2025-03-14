@@ -18,34 +18,36 @@ export interface SpotifyAlbum {
 export interface SpotifyTrack {
   id: string;
   name: string;
-  artists: SpotifyArtist[];
-  album: SpotifyAlbum;
-  uri: string;
-}
-
-interface SpotifySearchResponse {
-  tracks: {
-    items: SpotifyTrack[];
+  artists: Array<{ name: string }>;
+  album: {
+    images: Array<{ url: string }>;
   };
+  uri: string;
 }
 
 export async function searchSpotifyTracks(
   query: string
 ): Promise<SpotifyTrack[]> {
-  if (!query) return [];
+  const response = await fetch(
+    `/api/spotify/search?q=${encodeURIComponent(query)}`
+  );
 
-  try {
-    const response = await fetch(
-      `/api/spotify/search?q=${encodeURIComponent(query)}`
-    );
-    if (!response.ok) {
-      throw new Error(`Search failed: ${response.statusText}`);
-    }
-
-    const data: SpotifySearchResponse = await response.json();
-    return data.tracks.items;
-  } catch (error) {
-    console.error("Failed to search Spotify:", error);
-    throw error;
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error || "Failed to search tracks");
   }
+
+  const data = await response.json();
+  return data.tracks.items;
+}
+
+export async function getRandomReplacementTrack(): Promise<SpotifyTrack> {
+  const response = await fetch(`/api/spotify/replacement-track`);
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error || "Failed to get replacement track");
+  }
+
+  return await response.json();
 }
