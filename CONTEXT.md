@@ -45,9 +45,9 @@ Follow these rules when you write code:
 
 This is a Next.js application that helps users cure earworms (songs stuck in their head) by playing replacement songs. The app integrates with Spotify for authentication and playback.
 
-#### Cookie Handling in Next.js 14
+#### Cookie Handling in Next.js 15
 
-Next.js 14 uses an asynchronous cookie API. Key points:
+Next.js 15 uses an asynchronous cookie API. Key points:
 
 - The `cookies()` function returns a Promise of `ReadonlyRequestCookies`
 - Cookie operations must be handled with `await`:

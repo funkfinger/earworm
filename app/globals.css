@@ -1,26 +1,147 @@
-@import "tailwindcss";
+@import url("https://fonts.googleapis.com/css2?family=Playpen+Sans:wght@300;400;500;600;700&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --background-color: #4e342e;
+  --text-color: #ddd2a7;
+  --highlight-color: #ef798a;
+  --accent-color-a: #727d71;
+  --accent-color-b: #586f7c;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--background-color);
+  color: var(--text-color);
+  font-family: "Playpen Sans", cursive;
+}
+
+/* Hand-drawn styles inspired by handdrawn.css */
+.hand-drawn {
+  position: relative;
+  border: 2px solid var(--text-color);
+  border-radius: 255px 15px 225px 15px/15px 225px 15px 255px;
+  padding: 1em;
+  line-height: 1.5;
+  transform: rotate(-1deg);
+  box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.hand-drawn:hover {
+  transform: rotate(1deg) scale(1.01);
+}
+
+.hand-drawn-btn {
+  position: relative;
+  border: 2px solid var(--highlight-color);
+  background-color: var(--highlight-color);
+  color: white;
+  border-radius: 255px 15px 225px 15px/15px 225px 15px 255px;
+  padding: 0.5em 1em;
+  font-family: "Playpen Sans", cursive;
+  font-weight: 600;
+  transform: rotate(-1deg);
+  transition: all 0.2s ease;
+  box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.1);
+}
+
+.hand-drawn-btn:hover {
+  transform: rotate(1deg) scale(1.05);
+  box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.2);
+}
+
+.hand-drawn-btn:active {
+  transform: rotate(1deg) scale(0.95);
+  box-shadow: 1px 1px 0 rgba(0, 0, 0, 0.1);
+}
+
+.hand-drawn-input {
+  border: 2px solid var(--text-color);
+  border-radius: 255px 15px 225px 15px/15px 225px 15px 255px;
+  padding: 0.5em 1em;
+  font-family: "Playpen Sans", cursive;
+  background-color: rgba(255, 255, 255, 0.1);
+  color: var(--text-color);
+}
+
+.hand-drawn-input:focus {
+  outline: none;
+  border-color: var(--highlight-color);
+}
+
+.wiggle {
+  animation: wiggle 2.5s infinite;
+}
+
+@keyframes wiggle {
+  0%,
+  100% {
+    transform: rotate(-1deg);
+  }
+  50% {
+    transform: rotate(1deg);
+  }
+}
+
+.bounce {
+  animation: bounce 0.5s;
+}
+
+@keyframes bounce {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+/* Dialog styles */
+.dialog {
+  border-radius: 255px 15px 225px 15px/15px 225px 15px 255px;
+  border: 2px solid var(--highlight-color);
+  background-color: var(--background-color);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  padding: 1.5rem;
+  max-width: 90%;
+  margin: 0 auto;
+}
+
+/* Thought bubble for QT */
+.thought-bubble {
+  position: relative;
+  background-color: white;
+  border-radius: 30px;
+  padding: 20px;
+  margin-bottom: 30px;
+  color: #333;
+  box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.1);
+}
+
+.thought-bubble::after {
+  content: "";
+  position: absolute;
+  bottom: -20px;
+  left: 30px;
+  width: 20px;
+  height: 20px;
+  background-color: white;
+  border-radius: 50%;
+  box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.1);
+}
+
+.thought-bubble::before {
+  content: "";
+  position: absolute;
+  bottom: -35px;
+  left: 15px;
+  width: 15px;
+  height: 15px;
+  background-color: white;
+  border-radius: 50%;
+  box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.1);
 }
